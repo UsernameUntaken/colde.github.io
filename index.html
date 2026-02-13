@@ -3,671 +3,707 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>金额组合计算器</title>
-    <!-- Tailwind CSS v3 -->
+    <title>金额组合计算器 - 滑动窗口算法</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    <!-- 统一的 Tailwind 配置 -->
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3b82f6',
-                        secondary: '#60a5fa',
-                        accent: '#1e40af',
-                        neutral: '#f3f4f6',
-                        success: '#10b981',
+                        primary: '#1e40af',
+                        secondary: '#3b82f6',
+                        accent: '#f97316',
+                        neutral: '#f8fafc',
+                        success: '#22c55e',
                         warning: '#f59e0b',
-                        danger: '#ef4444',
+                        danger: '#ef4444'
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-up': 'slideUp 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-light': 'pulseLight 2s infinite'
                     },
                     keyframes: {
                         fadeIn: {
                             '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
+                            '100%': { opacity: '1' }
                         },
                         slideUp: {
                             '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
                         },
-                    },
+                        pulseLight: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.7' }
+                        }
+                    }
                 }
             }
         }
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
             .glass-effect {
-                @apply bg-white bg-opacity-80 backdrop-blur-md;
+                @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-lg;
             }
-            .card-shadow {
-                @apply shadow-lg hover:shadow-xl transition-shadow duration-300;
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+            }
+            .gradient-bg {
+                @apply bg-gradient-to-br from-primary/5 to-secondary/5;
+            }
+            .input-focus {
+                @apply focus:ring-2 focus:ring-accent/50 focus:border-accent;
             }
             .btn-primary {
-                @apply bg-primary hover:bg-accent text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2;
+                @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
             }
             .btn-secondary {
-                @apply bg-neutral hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2;
+                @apply bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
             }
-            .input-primary {
-                @apply border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300;
+            .btn-accent {
+                @apply bg-accent hover:bg-accent/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
             }
-            .badge {
-                @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-            }
-            .badge-success {
-                @apply badge bg-green-100 text-green-800;
-            }
-            .badge-warning {
-                @apply badge bg-yellow-100 text-yellow-800;
-            }
-            .badge-danger {
-                @apply badge bg-red-100 text-red-800;
-            }
-            .amount-item {
-                @apply px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200;
-            }
-            .amount-item-selected {
-                @apply bg-primary text-white;
-            }
-            .amount-item-unselected {
-                @apply bg-gray-100 text-gray-800 hover:bg-gray-200;
+            .btn-outline {
+                @apply border border-gray-300 hover:border-primary hover:text-primary font-medium py-2 px-4 rounded-lg transition-all duration-300;
             }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-5xl">
-        <!-- 页面标题 -->
-        <header class="text-center mb-8 animate-fade-in">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">金额组合计算器</h1>
-            <p class="text-gray-600">输入一系列金额，找出最多的不重叠组合（每个组合和≥100）</p>
-        </header>
+<body class="gradient-bg min-h-screen font-sans text-gray-800">
+    <!-- 顶部导航栏 -->
+    <header class="glass-effect sticky top-0 z-50 border-b border-gray-200">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-primary">金额组合计算器</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="theme-toggle" class="btn-outline text-sm flex items-center space-x-2">
+                    <i class="fa fa-moon-o"></i>
+                    <span>暗色模式</span>
+                </button>
+                <button id="help-btn" class="btn-outline text-sm flex items-center space-x-2">
+                    <i class="fa fa-question-circle"></i>
+                    <span>使用帮助</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
-        <!-- 主内容区 -->
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- 输入区域 -->
-            <div class="lg:col-span-1 glass-effect rounded-xl p-6 card-shadow animate-slide-up" style="animation-delay: 0.1s;">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fa fa-pencil-square-o mr-2 text-primary"></i>金额输入
-                </h2>
-                <form id="inputForm" class="space-y-4">
-                    <div>
-                        <label for="amountsInput" class="block text-sm font-medium text-gray-700 mb-1">输入金额</label>
-                        <textarea 
-                            id="amountsInput" 
-                            rows="5" 
-                            placeholder="请输入金额，用逗号、空格或换行分隔&#10;例如: 10, 20, 30.5, 40"
-                            class="input-primary w-full"
-                        ></textarea>
+    <!-- 主要内容区域 -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧输入区域 -->
+            <div class="lg:col-span-1">
+                <div class="glass-effect rounded-xl p-6 card-hover">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-pencil-square-o text-primary mr-2"></i>
+                        金额输入
+                    </h2>
+                    
+                    <!-- 输入方式选择 -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">输入方式</label>
+                        <div class="flex space-x-2">
+                            <button id="manual-input-btn" class="btn-primary flex-1 text-sm">
+                                <i class="fa fa-keyboard-o mr-1"></i>
+                                手动输入
+                            </button>
+                            <button id="batch-input-btn" class="btn-outline flex-1 text-sm">
+                                <i class="fa fa-list mr-1"></i>
+                                批量输入
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <button type="submit" class="btn-primary flex-1">
-                            <i class="fa fa-calculator"></i>计算组合
-                        </button>
-                        <button type="button" id="clearBtn" class="btn-secondary">
-                            <i class="fa fa-trash"></i>清空
+
+                    <!-- 手动输入区域 -->
+                    <div id="manual-input-section" class="mb-6">
+                        <label for="single-amount" class="block text-sm font-medium text-gray-700 mb-2">
+                            输入单个金额
+                        </label>
+                        <div class="flex space-x-2">
+                            <input type="number" id="single-amount" step="0.01" placeholder="例如：50.50" 
+                                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg input-focus">
+                            <button id="add-amount-btn" class="btn-secondary">
+                                <i class="fa fa-plus"></i>
+                                添加
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 批量输入区域 -->
+                    <div id="batch-input-section" class="mb-6 hidden">
+                        <label for="batch-amounts" class="block text-sm font-medium text-gray-700 mb-2">
+                            批量输入金额（用空格、逗号或换行分隔）
+                        </label>
+                        <textarea id="batch-amounts" rows="4" placeholder="例如：100 50 75 25 150"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg input-focus"></textarea>
+                        <button id="parse-batch-btn" class="btn-secondary mt-2 w-full">
+                            <i class="fa fa-magic"></i>
+                            解析输入
                         </button>
                     </div>
-                </form>
-                
-                <!-- 快速示例 -->
-                <div class="mt-6">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">快速示例:</h3>
+
+                    <!-- 当前金额列表 -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            当前金额列表 (<span id="amount-count">0</span> 个)
+                        </label>
+                        <div id="amount-list" class="max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-white/50">
+                            <div class="text-gray-400 text-sm italic">暂无金额</div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" class="example-btn px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
-                            10,20,30,40,50,60,70,80,90,100
+                        <button id="calculate-btn" class="btn-accent flex-1">
+                            <i class="fa fa-calculator mr-1"></i>
+                            开始计算
                         </button>
-                        <button type="button" class="example-btn px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
-                            15.5,25.5,35.5,45.5,55.5,65.5
+                        <button id="clear-btn" class="btn-outline flex-1">
+                            <i class="fa fa-trash mr-1"></i>
+                            清空
                         </button>
-                        <button type="button" class="example-btn px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
-                            1,2,5,10,20,50,100,150
+                        <button id="sample-btn" class="btn-outline text-sm w-full">
+                            <i class="fa fa-lightbulb-o mr-1"></i>
+                            使用示例数据
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- 结果展示区 -->
-            <div class="lg:col-span-2 glass-effect rounded-xl p-6 card-shadow animate-slide-up" style="animation-delay: 0.2s;">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fa fa-check-circle mr-2 text-primary"></i>计算结果
-                </h2>
-                
-                <!-- 结果概览 -->
-                <div id="resultOverview" class="hidden mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                            <p class="text-sm text-gray-600">所有组合总和</p>
-                            <p id="totalSum" class="text-2xl font-bold text-primary">0.00</p>
+            <!-- 右侧结果展示区域 -->
+            <div class="lg:col-span-2">
+                <!-- 结果概览卡片 -->
+                <div id="results-overview" class="glass-effect rounded-xl p-6 mb-6 card-hover hidden">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-line-chart text-primary mr-2"></i>
+                        计算结果概览
+                    </h2>
+                    
+                    <!-- 算法说明 -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-start">
+                            <i class="fa fa-info-circle text-primary mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium text-primary mb-1">双指针算法说明</h4>
+                                <p class="text-sm text-gray-600">
+                                    1. 降序排序数字<br>
+                                    2. 单个数字≥100直接成组<br>
+                                    3. 最大数+最小数≥100组成2数组合<br>
+                                    4. 无法组合的小数直接舍弃
+                                </p>
+                            </div>
                         </div>
-                        <div class="bg-green-50 rounded-lg p-4 border border-green-100">
-                            <p class="text-sm text-gray-600">组合数量</p>
-                            <p id="combinationCount" class="text-2xl font-bold text-success">0</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white/70 rounded-lg p-4 text-center">
+                            <div class="text-sm text-gray-600">总金额</div>
+                            <div id="total-amount" class="text-xl font-bold text-primary">¥0.00</div>
                         </div>
-                        <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
-                            <p class="text-sm text-gray-600">已使用金额数量</p>
-                            <p id="usedCount" class="text-2xl font-bold text-purple-600">0</p>
+                        <div class="bg-white/70 rounded-lg p-4 text-center">
+                            <div class="text-sm text-gray-600">组合数量</div>
+                            <div id="combination-count" class="text-xl font-bold text-success">0</div>
+                        </div>
+                        <div class="bg-white/70 rounded-lg p-4 text-center">
+                            <div class="text-sm text-gray-600">已使用金额</div>
+                            <div id="used-amount" class="text-xl font-bold text-secondary">¥0.00</div>
+                        </div>
+                        <div class="bg-white/70 rounded-lg p-4 text-center">
+                            <div class="text-sm text-gray-600">剩余金额</div>
+                            <div id="remaining-amount" class="text-xl font-bold text-warning">¥0.00</div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- 组合列表 -->
-                <div id="combinationsList" class="hidden mb-6">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">找到的组合:</h3>
-                    <div id="combinationsContainer">
-                        <!-- 组合将在这里动态生成 -->
+
+                    <!-- 图表区域 -->
+                    <div class="h-64 mb-4">
+                        <canvas id="results-chart"></canvas>
                     </div>
                 </div>
-                
-                <!-- 未使用的金额 -->
-                <div id="unusedAmounts" class="hidden mb-6">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">未使用的金额:</h3>
-                    <div id="unusedAmountsList" class="flex flex-wrap gap-2">
-                        <!-- 未使用的金额将在这里显示 -->
+
+                <!-- 组合结果列表 -->
+                <div id="combinations-container" class="glass-effect rounded-xl p-6 card-hover hidden">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-puzzle-piece text-primary mr-2"></i>
+                        组合结果详情
+                    </h2>
+                    
+                    <div id="combinations-list" class="space-y-4">
+                        <!-- 组合结果将在这里动态生成 -->
                     </div>
                 </div>
-                
-                <!-- 所有金额 -->
-                <div id="allAmounts" class="hidden mb-6">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">所有输入的金额:</h3>
-                    <div id="allAmountsList" class="flex flex-wrap gap-2">
-                        <!-- 所有金额将在这里显示 -->
+
+                <!-- 初始状态提示 -->
+                <div id="initial-state" class="glass-effect rounded-xl p-12 text-center">
+                    <div class="text-6xl text-gray-300 mb-4">
+                        <i class="fa fa-calculator"></i>
                     </div>
-                </div>
-                
-                <!-- 无结果提示 -->
-                <div id="noResult" class="hidden text-center py-8">
-                    <i class="fa fa-exclamation-circle text-4xl text-gray-300 mb-2"></i>
-                    <p class="text-gray-500">无法找到满足条件的组合</p>
-                    <p class="text-sm text-gray-400 mt-1">请尝试输入不同的金额</p>
-                </div>
-                
-                <!-- 初始提示 -->
-                <div id="initialPrompt" class="text-center py-8">
-                    <i class="fa fa-calculator text-4xl text-gray-300 mb-2"></i>
-                    <p class="text-gray-500">请在左侧输入金额并点击"计算组合"</p>
-                    <p class="text-sm text-gray-400 mt-1">或选择一个快速示例开始</p>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">准备就绪</h3>
+                    <p class="text-gray-500 mb-6">请在左侧输入金额数字，然后点击"开始计算"按钮</p>
+                    <button id="start-guide-btn" class="btn-primary">
+                        <i class="fa fa-play-circle mr-2"></i>
+                        查看使用指南
+                    </button>
                 </div>
             </div>
-        </main>
-        
-        <!-- 图表分析区 -->
-        <div id="chartSection" class="mt-6 glass-effect rounded-xl p-6 card-shadow hidden animate-slide-up" style="animation-delay: 0.3s;">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <i class="fa fa-bar-chart mr-2 text-primary"></i>组合分析
-            </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">组合对比</h3>
-                    <div class="bg-white rounded-lg p-4 h-64">
-                        <canvas id="combinationsChart"></canvas>
-                    </div>
+        </div>
+    </main>
+
+    <!-- 使用帮助模态框 -->
+    <div id="help-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-primary">使用帮助</h3>
+                    <button id="close-help-btn" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
                 </div>
-                <div>
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">金额分布</h3>
-                    <div class="bg-white rounded-lg p-4 h-64">
-                        <canvas id="distributionChart"></canvas>
+                
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">功能介绍</h4>
+                        <p class="text-gray-600">本工具使用滑动窗口算法，帮助您找到最多的金额组合，每个组合的和大于等于100，且组合内数字数量尽可能少。</p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">输入方式</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li>手动输入：逐个添加金额数字</li>
+                            <li>批量输入：一次性输入多个金额，用空格、逗号或换行分隔</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">算法说明</h4>
+                        <p class="text-gray-600">算法采用双指针贪心策略：1)降序排序数字 2)单个数字≥100直接成组 3)最大数+最小数≥100组成2数组合 4)无法组合的小数直接舍弃。</p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">结果解读</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li>组合数量：找到的满足条件的组合总数</li>
+                            <li>已使用金额：所有组合中金额的总和</li>
+                            <li>剩余金额：无法组成有效组合的金额总和</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 页脚 -->
-    <footer class="mt-12 text-center text-gray-500 text-sm py-4">
-        <p>金额组合计算器 &copy; 2025</p>
-    </footer>
+    <!-- 使用指南模态框 -->
+    <div id="guide-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-primary">使用指南</h3>
+                    <button id="close-guide-btn" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1">1</div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-1">输入金额</h4>
+                            <p class="text-gray-600">选择手动输入或批量输入方式，输入您的金额数字。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1">2</div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-1">开始计算</h4>
+                            <p class="text-gray-600">点击"开始计算"按钮，系统将使用滑动窗口算法为您找到最优组合。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1">3</div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-1">查看结果</h4>
+                            <p class="text-gray-600">在右侧查看计算结果概览和详细的组合列表。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1">4</div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-1">分析数据</h4>
+                            <p class="text-gray-600">通过图表和统计信息，了解金额使用情况和组合分布。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <button id="try-sample-btn" class="btn-primary w-full">
+                        <i class="fa fa-magic mr-2"></i>
+                        试用示例数据
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // 全局变量
-        let combinationsChart = null;
-        let distributionChart = null;
+        let amounts = [];
+        let combinations = [];
+        let resultsChart = null;
 
         // DOM 元素
-        const amountsInput = document.getElementById('amountsInput');
-        const inputForm = document.getElementById('inputForm');
-        const clearBtn = document.getElementById('clearBtn');
-        const exampleBtns = document.querySelectorAll('.example-btn');
-        
-        // 结果显示元素
-        const resultOverview = document.getElementById('resultOverview');
-        const totalSum = document.getElementById('totalSum');
-        const combinationCount = document.getElementById('combinationCount');
-        const usedCount = document.getElementById('usedCount');
-        const combinationsList = document.getElementById('combinationsList');
-        const combinationsContainer = document.getElementById('combinationsContainer');
-        const unusedAmounts = document.getElementById('unusedAmounts');
-        const unusedAmountsList = document.getElementById('unusedAmountsList');
-        const allAmounts = document.getElementById('allAmounts');
-        const allAmountsList = document.getElementById('allAmountsList');
-        const noResult = document.getElementById('noResult');
-        const initialPrompt = document.getElementById('initialPrompt');
-        const chartSection = document.getElementById('chartSection');
-
-        // 事件监听器
-        inputForm.addEventListener('submit', handleFormSubmit);
-        clearBtn.addEventListener('click', handleClear);
-        exampleBtns.forEach(btn => btn.addEventListener('click', handleExampleClick));
-
-        // 处理表单提交
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const inputText = amountsInput.value.trim();
+        const elements = {
+            // 输入相关
+            manualInputSection: document.getElementById('manual-input-section'),
+            batchInputSection: document.getElementById('batch-input-section'),
+            singleAmount: document.getElementById('single-amount'),
+            batchAmounts: document.getElementById('batch-amounts'),
+            amountList: document.getElementById('amount-list'),
+            amountCount: document.getElementById('amount-count'),
             
-            if (!inputText) {
-                showToast('请输入金额', 'warning');
+            // 按钮相关
+            manualInputBtn: document.getElementById('manual-input-btn'),
+            batchInputBtn: document.getElementById('batch-input-btn'),
+            addAmountBtn: document.getElementById('add-amount-btn'),
+            parseBatchBtn: document.getElementById('parse-batch-btn'),
+            calculateBtn: document.getElementById('calculate-btn'),
+            clearBtn: document.getElementById('clear-btn'),
+            sampleBtn: document.getElementById('sample-btn'),
+            
+            // 结果相关
+            initialState: document.getElementById('initial-state'),
+            resultsOverview: document.getElementById('results-overview'),
+            combinationsContainer: document.getElementById('combinations-container'),
+            combinationsList: document.getElementById('combinations-list'),
+            totalAmount: document.getElementById('total-amount'),
+            combinationCount: document.getElementById('combination-count'),
+            usedAmount: document.getElementById('used-amount'),
+            remainingAmount: document.getElementById('remaining-amount'),
+            
+            // 模态框相关
+            helpModal: document.getElementById('help-modal'),
+            guideModal: document.getElementById('guide-modal'),
+            helpBtn: document.getElementById('help-btn'),
+            startGuideBtn: document.getElementById('start-guide-btn'),
+            closeHelpBtn: document.getElementById('close-help-btn'),
+            closeGuideBtn: document.getElementById('close-guide-btn'),
+            trySampleBtn: document.getElementById('try-sample-btn'),
+            themeToggle: document.getElementById('theme-toggle')
+        };
+
+        // 初始化
+        function init() {
+            bindEvents();
+            updateAmountList();
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 输入方式切换
+            elements.manualInputBtn.addEventListener('click', () => switchInputMode('manual'));
+            elements.batchInputBtn.addEventListener('click', () => switchInputMode('batch'));
+            
+            // 添加金额
+            elements.addAmountBtn.addEventListener('click', addSingleAmount);
+            elements.singleAmount.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addSingleAmount();
+            });
+            
+            // 批量输入
+            elements.parseBatchBtn.addEventListener('click', parseBatchInput);
+            
+            // 计算和清空
+            elements.calculateBtn.addEventListener('click', calculateCombinations);
+            elements.clearBtn.addEventListener('click', clearAll);
+            elements.sampleBtn.addEventListener('click', loadSampleData);
+            
+            // 模态框
+            elements.helpBtn.addEventListener('click', () => elements.helpModal.classList.remove('hidden'));
+            elements.startGuideBtn.addEventListener('click', () => elements.guideModal.classList.remove('hidden'));
+            elements.closeHelpBtn.addEventListener('click', () => elements.helpModal.classList.add('hidden'));
+            elements.closeGuideBtn.addEventListener('click', () => elements.guideModal.classList.add('hidden'));
+            elements.trySampleBtn.addEventListener('click', () => {
+                elements.guideModal.classList.add('hidden');
+                loadSampleData();
+            });
+            
+            // 点击模态框背景关闭
+            elements.helpModal.addEventListener('click', (e) => {
+                if (e.target === elements.helpModal) elements.helpModal.classList.add('hidden');
+            });
+            elements.guideModal.addEventListener('click', (e) => {
+                if (e.target === elements.guideModal) elements.guideModal.classList.add('hidden');
+            });
+            
+            // 暗色模式切换
+            elements.themeToggle.addEventListener('click', toggleTheme);
+        }
+
+        // 切换输入模式
+        function switchInputMode(mode) {
+            if (mode === 'manual') {
+                elements.manualInputSection.classList.remove('hidden');
+                elements.batchInputSection.classList.add('hidden');
+                elements.manualInputBtn.classList.remove('btn-outline');
+                elements.manualInputBtn.classList.add('btn-primary');
+                elements.batchInputBtn.classList.remove('btn-primary');
+                elements.batchInputBtn.classList.add('btn-outline');
+                elements.singleAmount.focus();
+            } else {
+                elements.manualInputSection.classList.add('hidden');
+                elements.batchInputSection.classList.remove('hidden');
+                elements.manualInputBtn.classList.remove('btn-primary');
+                elements.manualInputBtn.classList.add('btn-outline');
+                elements.batchInputBtn.classList.remove('btn-outline');
+                elements.batchInputBtn.classList.add('btn-primary');
+                elements.batchAmounts.focus();
+            }
+        }
+
+        // 添加单个金额
+        function addSingleAmount() {
+            const value = parseFloat(elements.singleAmount.value);
+            if (!isNaN(value) && value > 0) {
+                amounts.push(value);
+                elements.singleAmount.value = '';
+                updateAmountList();
+                showNotification('金额添加成功！', 'success');
+                
+                // 动画效果
+                gsap.fromTo('#amount-list', 
+                    { opacity: 0.5, scale: 0.98 },
+                    { opacity: 1, scale: 1, duration: 0.3 }
+                );
+            } else {
+                showNotification('请输入有效的金额！', 'error');
+            }
+        }
+
+        // 解析批量输入
+        function parseBatchInput() {
+            const input = elements.batchAmounts.value.trim();
+            if (!input) {
+                showNotification('请输入金额！', 'error');
                 return;
             }
             
-            // 解析输入的金额
-            const amounts = parseInput(inputText);
+            // 使用正则表达式分割不同分隔符的数字
+            const numbers = input.split(/[\s,\n]+/)
+                .map(str => parseFloat(str.trim()))
+                .filter(num => !isNaN(num) && num > 0);
+            
+            if (numbers.length === 0) {
+                showNotification('未找到有效的金额！', 'error');
+                return;
+            }
+            
+            amounts.push(...numbers);
+            elements.batchAmounts.value = '';
+            updateAmountList();
+            showNotification(`成功添加 ${numbers.length} 个金额！`, 'success');
+            
+            // 动画效果
+            gsap.fromTo('#amount-list', 
+                { opacity: 0.5, scale: 0.98 },
+                { opacity: 1, scale: 1, duration: 0.3 }
+            );
+        }
+
+        // 更新金额列表显示
+        function updateAmountList() {
+            elements.amountCount.textContent = amounts.length;
             
             if (amounts.length === 0) {
-                showToast('无法解析输入的金额', 'error');
+                elements.amountList.innerHTML = '<div class="text-gray-400 text-sm italic">暂无金额</div>';
                 return;
             }
             
-            // 计算最多的不重叠组合
-            const result = findMaxCombinations(amounts);
+            const listHtml = amounts.map((amount, index) => 
+                `<div class="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
+                    <span class="text-sm">${index + 1}. ¥${amount.toFixed(2)}</span>
+                    <button onclick="removeAmount(${index})" class="text-red-400 hover:text-red-600 text-sm">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>`
+            ).join('');
             
-            // 显示结果
-            displayResults(result, amounts);
+            elements.amountList.innerHTML = listHtml;
         }
 
-        // 处理清空按钮点击
-        function handleClear() {
-            amountsInput.value = '';
-            resetResults();
-            showToast('已清空输入', 'info');
+        // 移除金额
+        function removeAmount(index) {
+            amounts.splice(index, 1);
+            updateAmountList();
+            showNotification('金额已移除', 'success');
         }
 
-        // 处理示例按钮点击
-        function handleExampleClick(e) {
-            amountsInput.value = e.target.textContent.trim();
-            inputForm.dispatchEvent(new Event('submit'));
+        // 清空所有
+        function clearAll() {
+            amounts = [];
+            combinations = [];
+            updateAmountList();
+            showInitialState();
+            showNotification('已清空所有数据', 'success');
         }
 
-        // 解析输入的金额
-        function parseInput(inputText) {
-            // 支持逗号、空格、换行等分隔符
-            const values = inputText.split(/[\s,\n]+/);
+        // 加载示例数据
+        function loadSampleData() {
+            amounts = [74.61, 67.61, 71.13, 61.56, 57.21, 59.38, 58.96, 53.92];
+            updateAmountList();
+            showNotification('已加载示例数据', 'success');
+        }
+
+        // 计算组合
+        function calculateCombinations() {
+            if (amounts.length === 0) {
+                showNotification('请先输入金额！', 'error');
+                return;
+            }
             
-            return values
-                .map(val => val.trim())
-                .filter(val => val !== '')
-                .map(val => {
-                    // 尝试解析为数字
-                    const num = parseFloat(val);
-                    return isNaN(num) ? null : num;
-                })
-                .filter(num => num !== null && num > 0); // 只保留正数
+            // 显示加载状态
+            showNotification('正在计算最优组合...', 'info');
+            
+            // 使用 setTimeout 模拟计算过程，避免界面卡顿
+            setTimeout(() => {
+                combinations = findMaxCombinations([...amounts]);
+                displayResults();
+                showNotification('计算完成！', 'success');
+            }, 500);
         }
 
-        // 查找最多的不重叠组合
+        // 双指针算法实现
         function findMaxCombinations(amounts) {
-            const target = 100;
-            let bestResult = {
-                combinations: [],
-                totalSum: 0,
-                unusedAmounts: [...amounts],
-                unusedSum: amounts.reduce((a, b) => a + b, 0),
-                hasValidCombination: false
-            };
+            // 1. 降序排序（优先用大数，保证每个组合数字数量最少）
+            const sortedNums = [...amounts].sort((a, b) => b - a);
+            const combinations = [];
             
-            // 为每个金额添加索引，以便跟踪使用情况
-            const amountsWithIndex = amounts.map((amount, index) => ({ amount, index }));
+            // 2. 初始化双指针
+            let left = 0;  // 左指针：指向当前最大的未使用数字
+            let right = sortedNums.length - 1;  // 右指针：指向当前最小的未使用数字
             
-            // 尝试不同的排序策略，找到最优解
-            const sortStrategies = [
-                // 从大到小排序
-                (a, b) => b.amount - a.amount,
-                // 从小到大排序
-                (a, b) => a.amount - b.amount
-            ];
-            
-            // 对每种排序策略运行算法
-            for (const sortStrategy of sortStrategies) {
-                const sortedAmounts = [...amountsWithIndex].sort(sortStrategy);
-                const used = new Set();
-                const currentCombinations = [];
-                
-                // 首先处理单个金额≥100的情况
-                for (const item of sortedAmounts) {
-                    if (item.amount >= target && !used.has(item.index)) {
-                        currentCombinations.push([item.amount]);
-                        used.add(item.index);
-                    }
+            // 3. 双指针配对，寻找满足条件的最小数字组合
+            while (left <= right) {
+                // 情况1：单个数字≥100
+                if (sortedNums[left] >= 100) {
+                    combinations.push([sortedNums[left]]);
+                    left++;
                 }
-                
-                // 尝试所有可能的组合
-                findCombinations(sortedAmounts, used, currentCombinations, target);
-                
-                // 计算当前结果的统计信息
-                const currentTotalSum = currentCombinations.reduce((sum, combo) => sum + combo.reduce((a, b) => a + b, 0), 0);
-                const currentUsedIndexes = new Set();
-                currentCombinations.forEach(combo => {
-                    combo.forEach(amount => {
-                        const index = amountsWithIndex.find(item => item.amount === amount).index;
-                        currentUsedIndexes.add(index);
-                    });
-                });
-                const currentUnusedAmounts = amounts.filter((_, index) => !currentUsedIndexes.has(index));
-                
-                // 更新最佳结果
-                if (currentCombinations.length > bestResult.combinations.length || 
-                    (currentCombinations.length === bestResult.combinations.length && 
-                     currentTotalSum > bestResult.totalSum)) {
-                    bestResult = {
-                        combinations: currentCombinations.map(combo => [...combo]),
-                        totalSum: currentTotalSum,
-                        unusedAmounts: currentUnusedAmounts,
-                        unusedSum: currentUnusedAmounts.reduce((a, b) => a + b, 0),
-                        hasValidCombination: currentCombinations.length > 0
-                    };
+                // 情况2：当前最大数+当前最小数≥100 → 组成2数组合（最少数字）
+                else if (sortedNums[left] + sortedNums[right] >= 100) {
+                    combinations.push([sortedNums[left], sortedNums[right]]);
+                    left++;
+                    right--;
+                }
+                // 情况3：最大数+最小数<100 → 最小数无法和任何数组成2数组合，舍弃
+                else {
+                    right--;
                 }
             }
             
-            // 特殊处理：对于特定的测试用例，确保得到正确的结果
-            // 这是一个临时解决方案，实际应用中应该优化算法本身
-            const testCase = [25.5, 37.7, 35.8, 38.93, 36.10, 29.49];
-            if (amounts.length === testCase.length && 
-                amounts.every((amt, i) => Math.abs(amt - testCase[i]) < 0.01)) {
-                // 强制使用正确的组合
-                bestResult = {
-                    combinations: [
-                        [25.5, 35.8, 38.93],
-                        [37.7, 36.10, 29.49]
-                    ],
-                    totalSum: 203.03,
-                    unusedAmounts: [],
-                    unusedSum: 0,
-                    hasValidCombination: true
-                };
-            }
-            
-            return bestResult;
-        }
-        
-        // 辅助函数：递归查找组合
-        function findCombinations(amounts, used, combinations, target) {
-            // 尝试从每个未使用的金额开始构建组合
-            for (let i = 0; i < amounts.length; i++) {
-                if (used.has(amounts[i].index)) continue;
-                
-                // 尝试构建组合
-                const currentCombination = [amounts[i].amount];
-                const currentUsed = new Set([amounts[i].index]);
-                let currentSum = amounts[i].amount;
-                
-                // 尝试添加更多金额
-                for (let j = 0; j < amounts.length; j++) {
-                    if (i === j || used.has(amounts[j].index) || currentUsed.has(amounts[j].index)) continue;
-                    
-                    currentCombination.push(amounts[j].amount);
-                    currentUsed.add(amounts[j].index);
-                    currentSum += amounts[j].amount;
-                    
-                    // 如果和已经≥100，停止添加
-                    if (currentSum >= target) {
-                        break;
-                    }
-                }
-                
-                // 如果组合和≥100，添加到结果中并继续递归
-                if (currentSum >= target) {
-                    // 标记这些金额为已使用
-                    currentUsed.forEach(index => used.add(index));
-                    combinations.push([...currentCombination]);
-                    
-                    // 递归查找更多组合
-                    findCombinations(amounts, used, combinations, target);
-                    
-                    // 如果已经使用了所有金额，返回
-                    if (used.size === amounts.length) {
-                        return;
-                    }
-                }
-            }
+            return combinations;
         }
 
         // 显示结果
-        function displayResults(result, allAmounts) {
-            // 重置结果区域
-            resetResults();
+        function displayResults() {
+            elements.initialState.classList.add('hidden');
+            elements.resultsOverview.classList.remove('hidden');
+            elements.combinationsContainer.classList.remove('hidden');
             
-            if (!result.hasValidCombination) {
-                noResult.classList.remove('hidden');
-                initialPrompt.classList.add('hidden');
+            // 计算统计信息
+            const total = amounts.reduce((sum, num) => sum + num, 0);
+            const used = combinations.reduce((sum, combo) => sum + combo.reduce((s, n) => s + n, 0), 0);
+            const remaining = total - used;
+            
+            // 更新概览
+            elements.totalAmount.textContent = `¥${total.toFixed(2)}`;
+            elements.combinationCount.textContent = combinations.length;
+            elements.usedAmount.textContent = `¥${used.toFixed(2)}`;
+            elements.remainingAmount.textContent = `¥${remaining.toFixed(2)}`;
+            
+            // 更新组合列表
+            updateCombinationsList();
+            
+            // 更新图表
+            updateChart(total, used, remaining);
+            
+            // 动画效果
+            gsap.fromTo('#results-overview', 
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.5 }
+            );
+            
+            gsap.fromTo('#combinations-container', 
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.5, delay: 0.2 }
+            );
+        }
+
+        // 更新组合列表
+        function updateCombinationsList() {
+            if (combinations.length === 0) {
+                elements.combinationsList.innerHTML = '<div class="text-center text-gray-500 py-8">未找到满足条件的组合</div>';
                 return;
             }
             
-            // 显示结果概览
-            resultOverview.classList.remove('hidden');
-            totalSum.textContent = result.totalSum.toFixed(2);
-            combinationCount.textContent = result.combinations.length.toString();
-            usedCount.textContent = allAmounts.length - result.unusedAmounts.length;
+            const listHtml = combinations.map((combo, index) => {
+                const sum = combo.reduce((s, n) => s + n, 0);
+                const numbers = combo.map(num => `¥${num.toFixed(2)}`).join(', ');
+                
+                return `
+                    <div class="bg-white/70 rounded-lg p-4 card-hover animate-fade-in">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-semibold text-primary">组合 ${index + 1}</h4>
+                            <span class="bg-success/10 text-success px-2 py-1 rounded text-sm font-medium">
+                                总和: ¥${sum.toFixed(2)}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            <i class="fa fa-list-ul mr-1 text-gray-400"></i>
+                            包含 ${combo.length} 个数字
+                        </div>
+                        <div class="bg-gray-50 rounded p-3 text-sm">
+                            ${numbers}
+                        </div>
+                    </div>
+                `;
+            }).join('');
             
-            // 显示组合列表
-            combinationsList.classList.remove('hidden');
-            combinationsContainer.innerHTML = '';
-            
-            result.combinations.forEach((combination, index) => {
-                const comboSum = combination.reduce((a, b) => a + b, 0);
-                const comboDiff = comboSum - 100;
-                
-                const comboDiv = document.createElement('div');
-                comboDiv.className = 'mb-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm animate-fade-in';
-                comboDiv.style.animationDelay = `${0.1 * index}s`;
-                
-                const comboHeader = document.createElement('div');
-                comboHeader.className = 'flex justify-between items-center mb-2';
-                
-                const comboTitle = document.createElement('h4');
-                comboTitle.className = 'font-medium text-gray-800';
-                comboTitle.textContent = `组合 ${index + 1}`;
-                
-                const comboInfo = document.createElement('div');
-                comboInfo.className = 'flex items-center gap-2';
-                
-                const sumBadge = document.createElement('span');
-                sumBadge.className = 'badge bg-blue-100 text-blue-800';
-                sumBadge.textContent = `总和: ${comboSum.toFixed(2)}`;
-                
-                const diffBadge = document.createElement('span');
-                diffBadge.className = comboDiff === 0 ? 'badge-success' : 'badge-warning';
-                diffBadge.textContent = comboDiff === 0 ? '刚好等于100' : `超出: ${comboDiff.toFixed(2)}`;
-                
-                comboInfo.appendChild(sumBadge);
-                comboInfo.appendChild(diffBadge);
-                comboHeader.appendChild(comboTitle);
-                comboHeader.appendChild(comboInfo);
-                
-                const amountsList = document.createElement('div');
-                amountsList.className = 'flex flex-wrap gap-2';
-                
-                combination.forEach(amount => {
-                    const amountEl = document.createElement('span');
-                    amountEl.className = 'amount-item amount-item-selected';
-                    amountEl.textContent = amount.toFixed(2);
-                    amountsList.appendChild(amountEl);
-                });
-                
-                comboDiv.appendChild(comboHeader);
-                comboDiv.appendChild(amountsList);
-                combinationsContainer.appendChild(comboDiv);
-            });
-            
-            // 显示未使用的金额
-            if (result.unusedAmounts.length > 0) {
-                unusedAmounts.classList.remove('hidden');
-                result.unusedAmounts.forEach(amount => {
-                    const amountEl = document.createElement('span');
-                    amountEl.className = 'amount-item amount-item-unselected';
-                    amountEl.textContent = amount.toFixed(2);
-                    unusedAmountsList.appendChild(amountEl);
-                });
-            }
-            
-            // 显示所有金额
-            allAmounts.classList.remove('hidden');
-            allAmounts.forEach(amount => {
-                // 检查金额是否在任何组合中
-                const isUsed = result.combinations.some(combo => combo.includes(amount));
-                const amountEl = document.createElement('span');
-                amountEl.className = `amount-item ${isUsed ? 'amount-item-selected' : 'amount-item-unselected'}`;
-                amountEl.textContent = amount.toFixed(2);
-                allAmountsList.appendChild(amountEl);
-            });
-            
-            // 显示图表
-            chartSection.classList.remove('hidden');
-            createCharts(result, allAmounts);
-            
-            // 隐藏初始提示
-            initialPrompt.classList.add('hidden');
-            
-            // 滚动到结果区域
-            resultOverview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            elements.combinationsList.innerHTML = listHtml;
         }
 
-        // 重置结果显示
-        function resetResults() {
-            resultOverview.classList.add('hidden');
-            combinationsList.classList.add('hidden');
-            unusedAmounts.classList.add('hidden');
-            allAmounts.classList.add('hidden');
-            noResult.classList.add('hidden');
-            initialPrompt.classList.remove('hidden');
-            chartSection.classList.add('hidden');
+        // 更新图表
+        function updateChart(total, used, remaining) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
             
-            combinationsContainer.innerHTML = '';
-            unusedAmountsList.innerHTML = '';
-            allAmountsList.innerHTML = '';
-            
-            // 重置图表
-            if (combinationsChart) {
-                combinationsChart.destroy();
-                combinationsChart = null;
+            if (resultsChart) {
+                resultsChart.destroy();
             }
             
-            if (distributionChart) {
-                distributionChart.destroy();
-                distributionChart = null;
-            }
-        }
-
-        // 创建图表
-        function createCharts(result, allAmounts) {
-            // 创建组合对比图表
-            const combinationsCtx = document.getElementById('combinationsChart').getContext('2d');
-            
-            combinationsChart = new Chart(combinationsCtx, {
-                type: 'bar',
-                data: {
-                    labels: result.combinations.map((_, i) => `组合 ${i + 1}`),
-                    datasets: [{
-                        label: '组合总和',
-                        data: result.combinations.map(c => c.reduce((a, b) => a + b, 0)),
-                        backgroundColor: result.combinations.map(() => '#3b82f6'),
-                        borderColor: result.combinations.map(() => '#1e40af'),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    const index = context.dataIndex;
-                                    const combo = result.combinations[index];
-                                    const diff = combo.reduce((a, b) => a + b, 0) - 100;
-                                    return [
-                                        `差额: ${diff.toFixed(2)}`,
-                                        `金额数量: ${combo.length}`
-                                    ];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: Math.max(100, ...result.combinations.map(c => c.reduce((a, b) => a + b, 0))) * 1.1,
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toFixed(0);
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    // 添加目标线
-                    plugins: {
-                        annotation: {
-                            annotations: {
-                                targetLine: {
-                                    type: 'line',
-                                    yMin: 100,
-                                    yMax: 100,
-                                    borderColor: '#10b981',
-                                    borderWidth: 2,
-                                    borderDash: [5, 5],
-                                    label: {
-                                        content: '目标 (100)',
-                                        enabled: true,
-                                        position: 'end'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // 创建金额分布图表
-            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
-            
-            // 将金额分组
-            const groups = {
-                '已使用': allAmounts.length - result.unusedAmounts.length,
-                '未使用': result.unusedAmounts.length
-            };
-            
-            distributionChart = new Chart(distributionCtx, {
+            resultsChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(groups),
+                    labels: ['已使用金额', '剩余金额'],
                     datasets: [{
-                        data: Object.values(groups),
-                        backgroundColor: ['#3b82f6', '#94a3b8'],
-                        borderColor: '#ffffff',
-                        borderWidth: 2
+                        data: [used, remaining],
+                        backgroundColor: ['#3b82f6', '#f59e0b'],
+                        borderColor: ['#2563eb', '#d97706'],
+                        borderWidth: 2,
+                        hoverOffset: 10
                     }]
                 },
                 options: {
@@ -675,70 +711,106 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
                         },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
                                     const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} (${percentage}%)`;
+                                    const value = context.parsed || 0;
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ¥${value.toFixed(2)} (${percentage}%)`;
                                 }
                             }
                         }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
                     },
                     cutout: '60%'
                 }
             });
         }
 
-        // 显示提示消息
-        function showToast(message, type = 'info') {
-            // 创建提示元素
-            const toast = document.createElement('div');
-            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-0 opacity-0`;
+        // 显示初始状态
+        function showInitialState() {
+            elements.initialState.classList.remove('hidden');
+            elements.resultsOverview.classList.add('hidden');
+            elements.combinationsContainer.classList.add('hidden');
             
-            // 设置不同类型的样式
+            if (resultsChart) {
+                resultsChart.destroy();
+                resultsChart = null;
+            }
+        }
+
+        // 切换主题
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.classList.contains('dark');
+            
+            if (isDark) {
+                body.classList.remove('dark');
+                body.classList.remove('bg-gray-900');
+                body.classList.add('gradient-bg');
+                elements.themeToggle.innerHTML = '<i class="fa fa-moon-o"></i><span>暗色模式</span>';
+            } else {
+                body.classList.add('dark');
+                body.classList.add('bg-gray-900');
+                body.classList.remove('gradient-bg');
+                elements.themeToggle.innerHTML = '<i class="fa fa-sun-o"></i><span>亮色模式</span>';
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+            
+            // 设置样式和图标
             switch (type) {
                 case 'success':
-                    toast.classList.add('bg-green-500', 'text-white');
-                    toast.innerHTML = `<i class="fa fa-check-circle mr-2"></i>${message}`;
+                    notification.classList.add('bg-success', 'text-white');
+                    notification.innerHTML = `<i class="fa fa-check-circle mr-2"></i>${message}`;
                     break;
                 case 'error':
-                    toast.classList.add('bg-red-500', 'text-white');
-                    toast.innerHTML = `<i class="fa fa-times-circle mr-2"></i>${message}`;
+                    notification.classList.add('bg-danger', 'text-white');
+                    notification.innerHTML = `<i class="fa fa-exclamation-circle mr-2"></i>${message}`;
                     break;
-                case 'warning':
-                    toast.classList.add('bg-yellow-500', 'text-white');
-                    toast.innerHTML = `<i class="fa fa-exclamation-triangle mr-2"></i>${message}`;
+                case 'info':
+                    notification.classList.add('bg-primary', 'text-white');
+                    notification.innerHTML = `<i class="fa fa-info-circle mr-2"></i>${message}`;
                     break;
-                default:
-                    toast.classList.add('bg-blue-500', 'text-white');
-                    toast.innerHTML = `<i class="fa fa-info-circle mr-2"></i>${message}`;
             }
             
             // 添加到页面
-            document.body.appendChild(toast);
+            document.body.appendChild(notification);
             
-            // 显示提示
+            // 显示动画
             setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-0');
-                toast.classList.add('translate-y-[-10px]', 'opacity-100');
-            }, 10);
+                notification.classList.remove('translate-x-full');
+            }, 100);
             
             // 自动隐藏
             setTimeout(() => {
-                toast.classList.remove('translate-y-[-10px]', 'opacity-100');
-                toast.classList.add('translate-y-0', 'opacity-0');
-                
-                // 移除元素
+                notification.classList.add('translate-x-full');
                 setTimeout(() => {
-                    document.body.removeChild(toast);
+                    document.body.removeChild(notification);
                 }, 300);
             }, 3000);
         }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
