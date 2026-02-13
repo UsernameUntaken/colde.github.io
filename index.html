@@ -3,2001 +3,681 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>毛不易 | 粉丝官方网站</title>
-    <!-- Tailwind CSS -->
+    <title>金额组合计算器</title>
+    <!-- Tailwind CSS v3 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- AOS Animation Library -->
-    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-    <!-- GSAP Animation Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <!-- Tailwind Config -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3B82F6',
-                        secondary: '#1E40AF',
-                        accent: '#F97316',
-                        dark: '#1F2937',
-                        light: '#F3F4F6'
+                        primary: '#3b82f6',
+                        secondary: '#60a5fa',
+                        accent: '#1e40af',
+                        neutral: '#f3f4f6',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
                     },
                     fontFamily: {
-                        sans: ['Noto Sans SC', 'sans-serif'],
-                        serif: ['Noto Serif SC', 'serif']
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
                     },
-                    backgroundImage: {
-                        'hero-pattern': "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7))"
-                    }
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    },
                 }
             }
         }
     </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;700&display=swap');
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Noto Sans SC', sans-serif;
-        }
-
-        .text-shadow {
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .bg-blur {
-            backdrop-filter: blur(8px);
-        }
-
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .album-card {
-            transition: all 0.3s ease;
-        }
-
-        .album-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .nav-link {
-            position: relative;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: #3B82F6;
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after,
-        .nav-link.active::after {
-            width: 100%;
-        }
-
-        .hero-section {
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-            position: relative;
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
-        }
-
-        .lyrics-container {
-            max-height: 400px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #3B82F6 #F3F4F6;
-        }
-
-        .lyrics-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .lyrics-container::-webkit-scrollbar-track {
-            background: #F3F4F6;
-        }
-
-        .lyrics-container::-webkit-scrollbar-thumb {
-            background-color: #3B82F6;
-            border-radius: 20px;
-        }
-
-        .music-player {
-            transition: all 0.3s ease;
-        }
-
-        .music-player:hover {
-            transform: translateY(-5px);
-        }
-
-        .concert-card {
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .concert-card:hover img {
-            transform: scale(1.05);
-        }
-
-        .concert-card img {
-            transition: transform 0.5s ease;
-        }
-
-        .timeline-item {
-            position: relative;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #3B82F6;
-            left: -10px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            width: 2px;
-            height: 100%;
-            background-color: #3B82F6;
-            left: 0;
-            top: 50%;
-        }
-
-        .timeline-item:first-child::after {
-            top: 50%;
-            height: 50%;
-        }
-
-        .timeline-item:last-child::after {
-            height: 50%;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.8s ease forwards;
-        }
-
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-        .delay-500 { animation-delay: 0.5s; }
-
-        /* 响应式调整 */
-        @media (max-width: 768px) {
-            .timeline-item::before,
-            .timeline-item::after {
-                display: none;
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .glass-effect {
+                @apply bg-white bg-opacity-80 backdrop-blur-md;
+            }
+            .card-shadow {
+                @apply shadow-lg hover:shadow-xl transition-shadow duration-300;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-accent text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2;
+            }
+            .btn-secondary {
+                @apply bg-neutral hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2;
+            }
+            .input-primary {
+                @apply border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300;
+            }
+            .badge {
+                @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+            }
+            .badge-success {
+                @apply badge bg-green-100 text-green-800;
+            }
+            .badge-warning {
+                @apply badge bg-yellow-100 text-yellow-800;
+            }
+            .badge-danger {
+                @apply badge bg-red-100 text-red-800;
+            }
+            .amount-item {
+                @apply px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200;
+            }
+            .amount-item-selected {
+                @apply bg-primary text-white;
+            }
+            .amount-item-unselected {
+                @apply bg-gray-100 text-gray-800 hover:bg-gray-200;
             }
         }
     </style>
 </head>
-<body class="bg-light text-dark">
-    <!-- 导航栏 -->
-    <nav class="fixed top-0 left-0 w-full bg-white bg-opacity-90 shadow-md z-50 transition-all duration-300" id="navbar">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="#" class="flex items-center space-x-2">
-                <span class="text-primary text-2xl font-bold">毛不易</span>
-                <span class="text-gray-600 text-sm hidden md:inline-block">官方粉丝网站</span>
-            </a>
-            
-            <!-- 桌面导航 -->
-            <div class="hidden md:flex space-x-8">
-                <a href="#home" class="nav-link active text-gray-800 hover:text-primary transition-colors">首页</a>
-                <a href="#about" class="nav-link text-gray-800 hover:text-primary transition-colors">关于毛毛</a>
-                <a href="#music" class="nav-link text-gray-800 hover:text-primary transition-colors">音乐作品</a>
-                <a href="#concerts" class="nav-link text-gray-800 hover:text-primary transition-colors">演唱会</a>
-                <a href="#news" class="nav-link text-gray-800 hover:text-primary transition-colors">新闻动态</a>
-                <a href="#gallery" class="nav-link text-gray-800 hover:text-primary transition-colors">图片 gallery</a>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8 animate-fade-in">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">金额组合计算器</h1>
+            <p class="text-gray-600">输入一系列金额，找出最多的不重叠组合（每个组合和≥100）</p>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 输入区域 -->
+            <div class="lg:col-span-1 glass-effect rounded-xl p-6 card-shadow animate-slide-up" style="animation-delay: 0.1s;">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-pencil-square-o mr-2 text-primary"></i>金额输入
+                </h2>
+                <form id="inputForm" class="space-y-4">
+                    <div>
+                        <label for="amountsInput" class="block text-sm font-medium text-gray-700 mb-1">输入金额</label>
+                        <textarea 
+                            id="amountsInput" 
+                            rows="5" 
+                            placeholder="请输入金额，用逗号、空格或换行分隔&#10;例如: 10, 20, 30.5, 40"
+                            class="input-primary w-full"
+                        ></textarea>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button type="submit" class="btn-primary flex-1">
+                            <i class="fa fa-calculator"></i>计算组合
+                        </button>
+                        <button type="button" id="clearBtn" class="btn-secondary">
+                            <i class="fa fa-trash"></i>清空
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- 快速示例 -->
+                <div class="mt-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">快速示例:</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" class="example-btn px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                            10,20,30,40,50,60,70,80,90,100
+                        </button>
+                        <button type="button" class="example-btn px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                            15.5,25.5,35.5,45.5,55.5,65.5
+                        </button>
+                        <button type="button" class="example-btn px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                            1,2,5,10,20,50,100,150
+                        </button>
+                    </div>
+                </div>
             </div>
-            
-            <!-- 移动端菜单按钮 -->
-            <button id="menu-toggle" class="md:hidden text-gray-800 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-        </div>
+
+            <!-- 结果展示区 -->
+            <div class="lg:col-span-2 glass-effect rounded-xl p-6 card-shadow animate-slide-up" style="animation-delay: 0.2s;">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-check-circle mr-2 text-primary"></i>计算结果
+                </h2>
+                
+                <!-- 结果概览 -->
+                <div id="resultOverview" class="hidden mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                            <p class="text-sm text-gray-600">所有组合总和</p>
+                            <p id="totalSum" class="text-2xl font-bold text-primary">0.00</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4 border border-green-100">
+                            <p class="text-sm text-gray-600">组合数量</p>
+                            <p id="combinationCount" class="text-2xl font-bold text-success">0</p>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                            <p class="text-sm text-gray-600">已使用金额数量</p>
+                            <p id="usedCount" class="text-2xl font-bold text-purple-600">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 组合列表 -->
+                <div id="combinationsList" class="hidden mb-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">找到的组合:</h3>
+                    <div id="combinationsContainer">
+                        <!-- 组合将在这里动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 未使用的金额 -->
+                <div id="unusedAmounts" class="hidden mb-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">未使用的金额:</h3>
+                    <div id="unusedAmountsList" class="flex flex-wrap gap-2">
+                        <!-- 未使用的金额将在这里显示 -->
+                    </div>
+                </div>
+                
+                <!-- 所有金额 -->
+                <div id="allAmounts" class="hidden mb-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">所有输入的金额:</h3>
+                    <div id="allAmountsList" class="flex flex-wrap gap-2">
+                        <!-- 所有金额将在这里显示 -->
+                    </div>
+                </div>
+                
+                <!-- 无结果提示 -->
+                <div id="noResult" class="hidden text-center py-8">
+                    <i class="fa fa-exclamation-circle text-4xl text-gray-300 mb-2"></i>
+                    <p class="text-gray-500">无法找到满足条件的组合</p>
+                    <p class="text-sm text-gray-400 mt-1">请尝试输入不同的金额</p>
+                </div>
+                
+                <!-- 初始提示 -->
+                <div id="initialPrompt" class="text-center py-8">
+                    <i class="fa fa-calculator text-4xl text-gray-300 mb-2"></i>
+                    <p class="text-gray-500">请在左侧输入金额并点击"计算组合"</p>
+                    <p class="text-sm text-gray-400 mt-1">或选择一个快速示例开始</p>
+                </div>
+            </div>
+        </main>
         
-        <!-- 移动端导航菜单 -->
-        <div id="mobile-menu" class="md:hidden bg-white shadow-lg absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 invisible">
-            <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
-                <a href="#home" class="mobile-nav-link text-gray-800 hover:text-primary transition-colors py-2 border-b border-gray-100">首页</a>
-                <a href="#about" class="mobile-nav-link text-gray-800 hover:text-primary transition-colors py-2 border-b border-gray-100">关于毛毛</a>
-                <a href="#music" class="mobile-nav-link text-gray-800 hover:text-primary transition-colors py-2 border-b border-gray-100">音乐作品</a>
-                <a href="#concerts" class="mobile-nav-link text-gray-800 hover:text-primary transition-colors py-2 border-b border-gray-100">演唱会</a>
-                <a href="#news" class="mobile-nav-link text-gray-800 hover:text-primary transition-colors py-2 border-b border-gray-100">新闻动态</a>
-                <a href="#gallery" class="mobile-nav-link text-gray-800 hover:text-primary transition-colors py-2">图片 gallery</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- 首页英雄区 -->
-    <section id="home" class="hero-section h-screen flex items-center justify-center" style="background-image: url('https://p3-doubao-search-sign.byteimg.com/labis/9d9b84a54acb880d4ea4af126a7a7391~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=AMdZo4JxUD5mrF5lgnJbj544Ufs%3D');">
-        <div class="container mx-auto px-4 z-10 text-center">
-            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 text-shadow fade-in">毛不易</h1>
-            <p class="text-xl md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto text-shadow fade-in delay-200">用音乐讲述故事，用歌声温暖人心</p>
-            <div class="flex flex-col md:flex-row justify-center gap-4 fade-in delay-300">
-                <a href="#music" class="bg-primary hover:bg-secondary text-white font-medium py-3 px-8 rounded-full transition-colors transform hover:scale-105 duration-300">
-                    聆听音乐
-                </a>
-                <a href="#about" class="bg-transparent border-2 border-white text-white font-medium py-3 px-8 rounded-full hover:bg-white hover:text-primary transition-all duration-300">
-                    了解更多
-                </a>
-            </div>
-        </div>
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
-            <a href="#about" class="flex flex-col items-center">
-                <span class="mb-2 text-sm">向下滚动</span>
-                <i class="fas fa-chevron-down"></i>
-            </a>
-        </div>
-    </section>
-
-    <!-- 关于毛毛 -->
-    <section id="about" class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4" data-aos="fade-up">关于毛毛</h2>
-                <div class="w-24 h-1 bg-primary mx-auto" data-aos="fade-up" data-aos-delay="100"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                <div data-aos="fade-right">
-                    <img src="https://p11-doubao-search-sign.byteimg.com/labis/0483b9a7c653c4b566fd0314a36688be~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=PzHCzWXIhPjuOmJOKdaxCmOIDok%3D" alt="毛不易" class="rounded-lg shadow-xl w-full h-auto">
-                </div>
-                
-                <div data-aos="fade-left">
-                    <h3 class="text-2xl font-bold mb-6 text-primary">毛不易简介</h3>
-                    <p class="text-gray-700 mb-6 leading-relaxed">
-                        毛不易，本名王维家，1994年10月1日出生于黑龙江省齐齐哈尔市泰来县，中国内地流行乐男歌手、作词人、作曲人，毕业于杭州师范大学护理专业。
-                    </p>
-                    <p class="text-gray-700 mb-6 leading-relaxed">
-                        2017年，毛不易以选手的身份参加《明日之子》选秀节目，并演唱《像我这样的人》《消愁》等多首原创歌曲，最终以1400多万粉推人气获得全国总决赛冠军，并得到了白金唱片及"最强厂牌"称号，从而开始正式进入演艺圈。
-                    </p>
-                    
-                    <div class="grid grid-cols-2 gap-6 mt-8">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-bold mb-2 text-primary">出生日期</h4>
-                            <p>1994年10月1日</p>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-bold mb-2 text-primary">出生地</h4>
-                            <p>黑龙江省齐齐哈尔市</p>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-bold mb-2 text-primary">星座</h4>
-                            <p>天秤座</p>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-bold mb-2 text-primary">身高</h4>
-                            <p>180cm</p>
-                        </div>
+        <!-- 图表分析区 -->
+        <div id="chartSection" class="mt-6 glass-effect rounded-xl p-6 card-shadow hidden animate-slide-up" style="animation-delay: 0.3s;">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fa fa-bar-chart mr-2 text-primary"></i>组合分析
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">组合对比</h3>
+                    <div class="bg-white rounded-lg p-4 h-64">
+                        <canvas id="combinationsChart"></canvas>
                     </div>
                 </div>
-            </div>
-            
-            <!-- 音乐历程时间线 -->
-            <div class="mt-24" data-aos="fade-up">
-                <h3 class="text-2xl font-bold mb-10 text-center">音乐历程</h3>
-                <div class="relative pl-8 md:pl-0">
-                    <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-gray-200 transform -translate-x-1/2"></div>
-                    
-                    <div class="timeline-container space-y-12">
-                        <!-- 2017年 -->
-                        <div class="timeline-item md:w-1/2 md:ml-auto md:pl-8 md:-mr-4 pl-0 md:text-left text-center" data-aos="fade-up">
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <span class="inline-block bg-primary text-white text-sm font-bold px-3 py-1 rounded-full mb-4">2017年</span>
-                                <h4 class="text-xl font-bold mb-2">《明日之子》夺冠出道</h4>
-                                <p class="text-gray-700">
-                                    参加腾讯视频选秀节目《明日之子》，演唱《消愁》《像我这样的人》等原创歌曲，获得全国总决赛冠军，正式进入演艺圈。
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <!-- 2018年 -->
-                        <div class="timeline-item md:w-1/2 md:mr-auto md:pr-8 md:-ml-4 pl-0 md:text-right text-center" data-aos="fade-up" data-aos-delay="100">
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <span class="inline-block bg-primary text-white text-sm font-bold px-3 py-1 rounded-full mb-4">2018年</span>
-                                <h4 class="text-xl font-bold mb-2">首张专辑《平凡的一天》</h4>
-                                <p class="text-gray-700">
-                                    推出首张个人录音室专辑《平凡的一天》，由李健、赵兆担任制作人，获得"流行音乐全金榜"2018上半年20大金曲奖。
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <!-- 2019年 -->
-                        <div class="timeline-item md:w-1/2 md:ml-auto md:pl-8 md:-mr-4 pl-0 md:text-left text-center" data-aos="fade-up" data-aos-delay="200">
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <span class="inline-block bg-primary text-white text-sm font-bold px-3 py-1 rounded-full mb-4">2019年</span>
-                                <h4 class="text-xl font-bold mb-2">《我是唱作人》</h4>
-                                <p class="text-gray-700">
-                                    参加爱奇艺华语唱作人生态挑战节目《我是唱作人》，带来《东北民谣》《小王》《水乡》等原创作品。
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <!-- 2020年 -->
-                        <div class="timeline-item md:w-1/2 md:mr-auto md:pr-8 md:-ml-4 pl-0 md:text-right text-center" data-aos="fade-up" data-aos-delay="300">
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <span class="inline-block bg-primary text-white text-sm font-bold px-3 py-1 rounded-full mb-4">2020年</span>
-                                <h4 class="text-xl font-bold mb-2">第二张专辑《小王》</h4>
-                                <p class="text-gray-700">
-                                    发行第二张个人音乐专辑《小王》，收录11首原创歌曲，专辑中的《二零三》获得第27届东方风云榜最佳作词奖。
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <!-- 2021年 -->
-                        <div class="timeline-item md:w-1/2 md:ml-auto md:pl-8 md:-mr-4 pl-0 md:text-left text-center" data-aos="fade-up" data-aos-delay="400">
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <span class="inline-block bg-primary text-white text-sm font-bold px-3 py-1 rounded-full mb-4">2021年</span>
-                                <h4 class="text-xl font-bold mb-2">第三张专辑《幼鸟指南》</h4>
-                                <p class="text-gray-700">
-                                    发行第三张个人音乐专辑《幼鸟指南》，凭借该专辑获得亚洲流行音乐大奖2021大众选择奖、年度TOP20专辑奖。
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <!-- 2022年至今 -->
-                        <div class="timeline-item md:w-1/2 md:mr-auto md:pr-8 md:-ml-4 pl-0 md:text-right text-center" data-aos="fade-up" data-aos-delay="500">
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <span class="inline-block bg-primary text-white text-sm font-bold px-3 py-1 rounded-full mb-4">2022年至今</span>
-                                <h4 class="text-xl font-bold mb-2">稳步发展</h4>
-                                <p class="text-gray-700">
-                                    参加《声生不息》《向往的生活》等综艺节目，发行多首热门单曲，举办多场巡回演唱会，音乐事业稳步发展。
-                                </p>
-                            </div>
-                        </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">金额分布</h3>
+                    <div class="bg-white rounded-lg p-4 h-64">
+                        <canvas id="distributionChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- 音乐作品 -->
-    <section id="music" class="py-20 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4" data-aos="fade-up">音乐作品</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
-                    毛不易的音乐作品以其独特的视角和深刻的情感表达著称，每首歌都讲述着一个故事，触动人心。
-                </p>
-                <div class="w-24 h-1 bg-primary mx-auto mt-4" data-aos="fade-up" data-aos-delay="200"></div>
-            </div>
-            
-            <!-- 专辑列表 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                <!-- 平凡的一天 -->
-                <div class="album-card bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up">
-                    <div class="relative">
-                        <img src="https://p11-doubao-search-sign.byteimg.com/ecom-shop-material/jpeg_m_862bfffd7a4166a86e06400f2e2d71da_sx_78831_www800-800~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=aHgNuIEP6luqRHC4aD8nZ%2By7CFw%3D" alt="平凡的一天" class="w-full h-64 object-cover">
-                        <div class="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
-                            2018
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">平凡的一天</h3>
-                        <p class="text-gray-600 mb-4">首张个人录音室专辑</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">民谣</span>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">流行</span>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">原创</span>
-                        </div>
-                        <button class="album-details-btn w-full bg-primary hover:bg-secondary text-white py-2 rounded-md transition-colors" data-album="album1">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 小王 -->
-                <div class="album-card bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up" data-aos-delay="100">
-                    <div class="relative">
-                        <img src="https://p11-doubao-search-sign.byteimg.com/labis/c201097a4fa59d006ec87e68832e71ca~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=2C48IXUKELE0fozZHL6E7txQUhg%3D" alt="小王" class="w-full h-64 object-cover">
-                        <div class="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
-                            2020
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">小王</h3>
-                        <p class="text-gray-600 mb-4">第二张个人录音室专辑</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">民谣</span>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">流行</span>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">原创</span>
-                        </div>
-                        <button class="album-details-btn w-full bg-primary hover:bg-secondary text-white py-2 rounded-md transition-colors" data-album="album2">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 幼鸟指南 -->
-                <div class="album-card bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up" data-aos-delay="200">
-                    <div class="relative">
-                        <img src="https://p11-doubao-search-sign.byteimg.com/ecom-shop-material/jpeg_m_d6f437118cf550c9caa2ff9955f8a574_sx_49329_www800-800~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=ebkBoHurau191TfxFh516QeIIh0%3D" alt="幼鸟指南" class="w-full h-64 object-cover">
-                        <div class="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
-                            2021
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">幼鸟指南</h3>
-                        <p class="text-gray-600 mb-4">第三张个人录音室专辑</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">民谣</span>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">流行</span>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">原创</span>
-                        </div>
-                        <button class="album-details-btn w-full bg-primary hover:bg-secondary text-white py-2 rounded-md transition-colors" data-album="album3">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 热门单曲 -->
-            <div class="mt-20">
-                <h3 class="text-2xl font-bold mb-10 text-center" data-aos="fade-up">热门单曲</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- 消愁 -->
-                    <div class="music-player bg-white p-4 rounded-lg shadow-md flex items-center" data-aos="fade-up">
-                        <div class="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                            <img src="https://p3-doubao-search-sign.byteimg.com/labis/4f44cefc785e5d7bb1cf4cf61232349c~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=IXq9x8e3cAbuciIB343Wx2c22wU%3D" alt="消愁" class="w-full h-full object-cover">
-                        </div>
-                        <div class="ml-4 flex-grow">
-                            <h4 class="font-bold">消愁</h4>
-                            <p class="text-sm text-gray-600">2017年</p>
-                        </div>
-                        <button class="song-play-btn text-primary hover:text-secondary" data-song="消愁">
-                            <i class="fas fa-play-circle text-2xl"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- 像我这样的人 -->
-                    <div class="music-player bg-white p-4 rounded-lg shadow-md flex items-center" data-aos="fade-up" data-aos-delay="100">
-                        <div class="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                            <img src="https://p3-doubao-search-sign.byteimg.com/labis/7bc7811384ab7203779c096282391523~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=yoqTbV%2FwfTBbQlzBxXoSq%2F4izUQ%3D" alt="像我这样的人" class="w-full h-full object-cover">
-                        </div>
-                        <div class="ml-4 flex-grow">
-                            <h4 class="font-bold">像我这样的人</h4>
-                            <p class="text-sm text-gray-600">2017年</p>
-                        </div>
-                        <button class="song-play-btn text-primary hover:text-secondary" data-song="像我这样的人">
-                            <i class="fas fa-play-circle text-2xl"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- 平凡的一天 -->
-                    <div class="music-player bg-white p-4 rounded-lg shadow-md flex items-center" data-aos="fade-up" data-aos-delay="200">
-                        <div class="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                            <img src="https://p11-doubao-search-sign.byteimg.com/ecom-shop-material/jpeg_m_862bfffd7a4166a86e06400f2e2d71da_sx_78831_www800-800~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=aHgNuIEP6luqRHC4aD8nZ%2By7CFw%3D" alt="平凡的一天" class="w-full h-full object-cover">
-                        </div>
-                        <div class="ml-4 flex-grow">
-                            <h4 class="font-bold">平凡的一天</h4>
-                            <p class="text-sm text-gray-600">2018年</p>
-                        </div>
-                        <button class="song-play-btn text-primary hover:text-secondary" data-song="平凡的一天">
-                            <i class="fas fa-play-circle text-2xl"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- 一荤一素 -->
-                    <div class="music-player bg-white p-4 rounded-lg shadow-md flex items-center" data-aos="fade-up" data-aos-delay="300">
-                        <div class="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                            <img src="https://p3-doubao-search-sign.byteimg.com/labis/189d063601e58b55762963e83270744d~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=WWFvH6RoM7V8MC5wOSzVynwJRyM%3D" alt="一荤一素" class="w-full h-full object-cover">
-                        </div>
-                        <div class="ml-4 flex-grow">
-                            <h4 class="font-bold">一荤一素</h4>
-                            <p class="text-sm text-gray-600">2018年</p>
-                        </div>
-                        <button class="song-play-btn text-primary hover:text-secondary" data-song="一荤一素">
-                            <i class="fas fa-play-circle text-2xl"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- 二零三 -->
-                    <div class="music-player bg-white p-4 rounded-lg shadow-md flex items-center" data-aos="fade-up" data-aos-delay="400">
-                        <div class="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                            <img src="https://p11-doubao-search-sign.byteimg.com/labis/c201097a4fa59d006ec87e68832e71ca~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=2C48IXUKELE0fozZHL6E7txQUhg%3D" alt="二零三" class="w-full h-full object-cover">
-                        </div>
-                        <div class="ml-4 flex-grow">
-                            <h4 class="font-bold">二零三</h4>
-                            <p class="text-sm text-gray-600">2020年</p>
-                        </div>
-                        <button class="song-play-btn text-primary hover:text-secondary" data-song="二零三">
-                            <i class="fas fa-play-circle text-2xl"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- 无名的人 -->
-                    <div class="music-player bg-white p-4 rounded-lg shadow-md flex items-center" data-aos="fade-up" data-aos-delay="500">
-                        <div class="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                            <img src="https://p11-doubao-search-sign.byteimg.com/labis/0f8777c9530008e53947c4d1a3f26b48~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=S3stA9xnAUeDdrBOP2WbZgDnwKQ%3D" alt="无名的人" class="w-full h-full object-cover">
-                        </div>
-                        <div class="ml-4 flex-grow">
-                            <h4 class="font-bold">无名的人</h4>
-                            <p class="text-sm text-gray-600">2022年</p>
-                        </div>
-                        <button class="song-play-btn text-primary hover:text-secondary" data-song="无名的人">
-                            <i class="fas fa-play-circle text-2xl"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 演唱会 -->
-    <section id="concerts" class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4" data-aos="fade-up">演唱会</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
-                    毛不易的演唱会以其温暖的氛围和精彩的演出深受粉丝喜爱，每场演唱会都是一次难忘的音乐之旅。
-                </p>
-                <div class="w-24 h-1 bg-primary mx-auto mt-4" data-aos="fade-up" data-aos-delay="200"></div>
-            </div>
-            
-            <!-- 演唱会列表 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- 像我这样的人 全国巡回演唱会 -->
-                <div class="concert-card bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up">
-                    <div class="relative overflow-hidden h-48">
-                        <img src="https://p3-doubao-search-sign.byteimg.com/labis/9d9b84a54acb880d4ea4af126a7a7391~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=AMdZo4JxUD5mrF5lgnJbj544Ufs%3D" alt="像我这样的人 全国巡回演唱会" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
-                        <div class="absolute bottom-0 left-0 p-4 text-white">
-                            <span class="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">2018-2019</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">像我这样的人 全国巡回演唱会</h3>
-                        <div class="flex items-center mb-4">
-                            <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
-                            <span class="text-gray-600">上海、北京、成都、广州等</span>
-                        </div>
-                        <p class="text-gray-700 mb-4">
-                            毛不易首次个人巡回演唱会，演唱了《消愁》《像我这样的人》等多首热门歌曲，场场爆满，深受粉丝喜爱。
-                        </p>
-                        <button class="concert-details-btn w-full bg-primary hover:bg-secondary text-white py-2 rounded-md transition-colors" data-concert="concert1">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 毛不易2022全国巡回演唱会 -->
-                <div class="concert-card bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up" data-aos-delay="100">
-                    <div class="relative overflow-hidden h-48">
-                        <img src="https://p3-doubao-search-sign.byteimg.com/labis/189d063601e58b55762963e83270744d~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=WWFvH6RoM7V8MC5wOSzVynwJRyM%3D" alt="毛不易2022全国巡回演唱会" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
-                        <div class="absolute bottom-0 left-0 p-4 text-white">
-                            <span class="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">2022</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">毛不易2022全国巡回演唱会</h3>
-                        <div class="flex items-center mb-4">
-                            <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
-                            <span class="text-gray-600">北京、上海、广州、深圳等</span>
-                        </div>
-                        <p class="text-gray-700 mb-4">
-                            以《幼鸟指南》专辑为主题的全国巡回演唱会，展现了毛不易音乐风格的多样性和成长。
-                        </p>
-                        <button class="concert-details-btn w-full bg-primary hover:bg-secondary text-white py-2 rounded-md transition-colors" data-concert="concert2">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 线上演唱会 -->
-                <div class="concert-card bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up" data-aos-delay="200">
-                    <div class="relative overflow-hidden h-48">
-                        <img src="https://p26-doubao-search-sign.byteimg.com/pgc-image/534593f55cb84ef4b60928249e43b390~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=%2FXVzRRX3xH202PzhlLYrDF5ahT0%3D" alt="线上演唱会" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
-                        <div class="absolute bottom-0 left-0 p-4 text-white">
-                            <span class="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">2020-2021</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">线上演唱会</h3>
-                        <div class="flex items-center mb-4">
-                            <i class="fas fa-globe text-blue-500 mr-2"></i>
-                            <span class="text-gray-600">线上直播</span>
-                        </div>
-                        <p class="text-gray-700 mb-4">
-                            疫情期间举办的线上演唱会，通过互联网连接全球粉丝，创新的演出形式获得广泛好评。
-                        </p>
-                        <button class="concert-details-btn w-full bg-primary hover:bg-secondary text-white py-2 rounded-md transition-colors" data-concert="concert3">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 新闻动态 -->
-    <section id="news" class="py-20 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4" data-aos="fade-up">新闻动态</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
-                    了解毛不易的最新动态、活动和音乐作品。
-                </p>
-                <div class="w-24 h-1 bg-primary mx-auto mt-4" data-aos="fade-up" data-aos-delay="200"></div>
-            </div>
-            
-            <!-- 新闻列表 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- 新闻1 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up">
-                    <div class="h-48 overflow-hidden">
-                        <img src="https://p11-doubao-search-sign.byteimg.com/labis/402548ef022dbee313da7337d39cf30d~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=uUqeOYuIXJc%2B3ZEZGQ7YzkzZSbc%3D" alt="毛不易获得2024年度音乐人" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">获奖</span>
-                            <span class="text-gray-500 text-sm">2025年1月</span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">毛不易被《人物》杂志评选为2024年度音乐人</h3>
-                        <p class="text-gray-700 mb-4">
-                            毛不易凭借其出色的音乐才华和对音乐的独特理解，被《人物》杂志评选为2024年度音乐人，这是对他音乐事业的高度认可。
-                        </p>
-                        <a href="#" class="text-primary hover:text-secondary font-medium flex items-center">
-                            阅读更多 <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- 新闻2 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up" data-aos-delay="100">
-                    <div class="h-48 overflow-hidden">
-                        <img src="https://p11-doubao-search-sign.byteimg.com/tos-cn-i-qvj2lq49k0/e3a6ec97e49c464e96bac061febab8b2~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=wmY%2BA4ydFmcRTbHPQTYalzWh6uc%3D" alt="毛不易参加2025年央视春晚" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">演出</span>
-                            <span class="text-gray-500 text-sm">2025年1月</span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">毛不易参加2025年中央广播电视总台春节联欢晚会</h3>
-                        <p class="text-gray-700 mb-4">
-                            毛不易登上2025年央视春晚舞台，演唱歌曲《岁月里的花》，用温暖的歌声为全国观众送上新春祝福。
-                        </p>
-                        <a href="#" class="text-primary hover:text-secondary font-medium flex items-center">
-                            阅读更多 <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- 新闻3 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-lg" data-aos="fade-up" data-aos-delay="200">
-                    <div class="h-48 overflow-hidden">
-                        <img src="https://p3-doubao-search-sign.byteimg.com/labis/7bc7811384ab7203779c096282391523~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=yoqTbV%2FwfTBbQlzBxXoSq%2F4izUQ%3D" alt="毛不易发布新歌《一声老师一生老师》" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">新单曲</span>
-                            <span class="text-gray-500 text-sm">2024年6月</span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">毛不易发布新歌《一声老师一生老师》</h3>
-                        <p class="text-gray-700 mb-4">
-                            毛不易发布新歌《一声老师一生老师》，用温暖的旋律和真挚的歌词表达对老师的感激之情，歌曲上线后获得广泛好评。
-                        </p>
-                        <a href="#" class="text-primary hover:text-secondary font-medium flex items-center">
-                            阅读更多 <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 加载更多按钮 -->
-            <div class="text-center mt-12">
-                <button id="load-more-news" class="bg-white border border-primary text-primary hover:bg-primary hover:text-white font-medium py-3 px-8 rounded-full transition-colors">
-                    加载更多新闻
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- 图片Gallery -->
-    <section id="gallery" class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4" data-aos="fade-up">图片 Gallery</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
-                    精选毛不易的写真、演出和活动照片，记录他的音乐旅程。
-                </p>
-                <div class="w-24 h-1 bg-primary mx-auto mt-4" data-aos="fade-up" data-aos-delay="200"></div>
-            </div>
-            
-            <!-- 图片分类标签 -->
-            <div class="flex flex-wrap justify-center gap-4 mb-12" data-aos="fade-up">
-                <button class="gallery-filter-btn active bg-primary text-white px-4 py-2 rounded-full text-sm font-medium transition-colors" data-filter="all">
-                    全部
-                </button>
-                <button class="gallery-filter-btn bg-gray-100 text-gray-700 hover:bg-primary hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-colors" data-filter="portrait">
-                    写真
-                </button>
-                <button class="gallery-filter-btn bg-gray-100 text-gray-700 hover:bg-primary hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-colors" data-filter="concert">
-                    演唱会
-                </button>
-                <button class="gallery-filter-btn bg-gray-100 text-gray-700 hover:bg-primary hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-colors" data-filter="event">
-                    活动
-                </button>
-            </div>
-            
-            <!-- 图片网格 -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- 写真图片 -->
-                <div class="gallery-item portrait overflow-hidden rounded-lg shadow-md" data-aos="fade-up">
-                    <img src="https://p11-doubao-search-sign.byteimg.com/labis/0483b9a7c653c4b566fd0314a36688be~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=PzHCzWXIhPjuOmJOKdaxCmOIDok%3D" alt="毛不易写真" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
-                </div>
-                
-                <div class="gallery-item portrait overflow-hidden rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="100">
-                    <img src="https://p11-doubao-search-sign.byteimg.com/ecom-shop-material/jpeg_m_d6f437118cf550c9caa2ff9955f8a574_sx_49329_www800-800~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=ebkBoHurau191TfxFh516QeIIh0%3D" alt="毛不易写真" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
-                </div>
-                
-                <!-- 演唱会图片 -->
-                <div class="gallery-item concert overflow-hidden rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="200">
-                    <img src="https://p3-doubao-search-sign.byteimg.com/labis/9d9b84a54acb880d4ea4af126a7a7391~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=AMdZo4JxUD5mrF5lgnJbj544Ufs%3D" alt="毛不易演唱会" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
-                </div>
-                
-                <div class="gallery-item concert overflow-hidden rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="300">
-                    <img src="https://p3-doubao-search-sign.byteimg.com/labis/189d063601e58b55762963e83270744d~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=WWFvH6RoM7V8MC5wOSzVynwJRyM%3D" alt="毛不易演唱会" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
-                </div>
-                
-                <!-- 活动图片 -->
-                <div class="gallery-item event overflow-hidden rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="400">
-                    <img src="https://p11-doubao-search-sign.byteimg.com/labis/0f8777c9530008e53947c4d1a3f26b48~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=S3stA9xnAUeDdrBOP2WbZgDnwKQ%3D" alt="毛不易活动" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
-                </div>
-                
-                <div class="gallery-item event overflow-hidden rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="500">
-                    <img src="https://p11-doubao-search-sign.byteimg.com/labis/402548ef022dbee313da7337d39cf30d~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=uUqeOYuIXJc%2B3ZEZGQ7YzkzZSbc%3D" alt="毛不易活动" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
-                </div>
-                
-                <!-- 更多图片 -->
-                <div class="gallery-item portrait overflow-hidden rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="600">
-                    <img src="https://p11-doubao-search-sign.byteimg.com/ecom-shop-material/jpeg_m_862bfffd7a4166a86e06400f2e2d71da_sx_78831_www800-800~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=aHgNuIEP6luqRHC4aD8nZ%2By7CFw%3D" alt="毛不易写真" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
-                </div>
-                
-                <div class="gallery-item concert overflow-hidden rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="700">
-                    <img src="https://p3-doubao-search-sign.byteimg.com/labis/4f44cefc785e5d7bb1cf4cf61232349c~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=IXq9x8e3cAbuciIB343Wx2c22wU%3D" alt="毛不易演唱会" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
-                </div>
-            </div>
-            
-            <!-- 加载更多按钮 -->
-            <div class="text-center mt-12">
-                <button id="load-more-gallery" class="bg-white border border-primary text-primary hover:bg-primary hover:text-white font-medium py-3 px-8 rounded-full transition-colors">
-                    加载更多图片
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- 粉丝互动区 -->
-    <section class="py-20 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4" data-aos="fade-up">粉丝互动</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
-                    加入毛不易的粉丝社区，与其他粉丝一起分享喜爱，参与互动活动。
-                </p>
-                <div class="w-24 h-1 bg-primary mx-auto mt-4" data-aos="fade-up" data-aos-delay="200"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <!-- 留言板 -->
-                <div class="bg-white rounded-lg shadow-lg p-6" data-aos="fade-right">
-                    <h3 class="text-2xl font-bold mb-6 flex items-center">
-                        <i class="fas fa-comments text-primary mr-3"></i>
-                        粉丝留言板
-                    </h3>
-                    
-                    <div class="mb-6">
-                        <textarea id="fan-message" class="w-full border border-gray-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" rows="4" placeholder="写下你想对毛毛说的话..."></textarea>
-                        <div class="flex justify-between items-center mt-2">
-                            <div class="flex items-center">
-                                <input type="text" id="fan-name" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" placeholder="昵称" style="width: 120px;">
-                            </div>
-                            <button id="submit-message" class="bg-primary hover:bg-secondary text-white font-medium py-2 px-6 rounded-full transition-colors">
-                                提交留言
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="messages-container" class="space-y-4 max-h-96 overflow-y-auto">
-                        <!-- 留言将在这里动态加载 -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-bold text-primary">毛毛的小粉丝</span>
-                                <span class="text-gray-500 text-sm">2025-12-20</span>
-                            </div>
-                            <p class="text-gray-700">毛毛的歌陪伴我度过了很多难过的日子，希望你能一直唱下去，我们会一直支持你！</p>
-                        </div>
-                        
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-bold text-primary">音乐旅行者</span>
-                                <span class="text-gray-500 text-sm">2025-12-19</span>
-                            </div>
-                            <p class="text-gray-700">《平凡的一天》这张专辑真的太治愈了，每首歌都能让人静下心来，感谢毛毛带来这么好的音乐！</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 粉丝活动 -->
-                <div class="bg-white rounded-lg shadow-lg p-6" data-aos="fade-left">
-                    <h3 class="text-2xl font-bold mb-6 flex items-center">
-                        <i class="fas fa-calendar-alt text-primary mr-3"></i>
-                        粉丝活动
-                    </h3>
-                    
-                    <div class="space-y-6">
-                        <!-- 活动1 -->
-                        <div class="border-l-4 border-primary pl-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h4 class="font-bold">毛不易生日应援活动</h4>
-                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">进行中</span>
-                            </div>
-                            <p class="text-gray-700 mb-2">
-                                为庆祝毛毛10月1日生日，粉丝团发起线上线下应援活动，欢迎大家参与！
-                            </p>
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="far fa-clock mr-2"></i>
-                                <span>2025-09-15 至 2025-10-01</span>
-                            </div>
-                            <button class="mt-3 text-primary hover:text-secondary font-medium flex items-center">
-                                参与活动 <i class="fas fa-arrow-right ml-2"></i>
-                            </button>
-                        </div>
-                        
-                        <!-- 活动2 -->
-                        <div class="border-l-4 border-gray-300 pl-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h4 class="font-bold">毛不易新专辑预热活动</h4>
-                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">即将开始</span>
-                            </div>
-                            <p class="text-gray-700 mb-2">
-                                毛不易第四张个人专辑即将发布，参与预热活动有机会获得签名专辑和周边礼品！
-                            </p>
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="far fa-clock mr-2"></i>
-                                <span>2026-01-01 至 2026-02-01</span>
-                            </div>
-                            <button class="mt-3 text-primary hover:text-secondary font-medium flex items-center">
-                                预约提醒 <i class="fas fa-bell ml-2"></i>
-                            </button>
-                        </div>
-                        
-                        <!-- 活动3 -->
-                        <div class="border-l-4 border-gray-300 pl-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h4 class="font-bold">毛不易粉丝线下聚会</h4>
-                                <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">已结束</span>
-                            </div>
-                            <p class="text-gray-700 mb-2">
-                                北京、上海、广州三地同步举行粉丝线下聚会，分享毛毛的音乐故事，交流粉丝心得。
-                            </p>
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="far fa-clock mr-2"></i>
-                                <span>2025-08-15</span>
-                            </div>
-                            <button class="mt-3 text-primary hover:text-secondary font-medium flex items-center">
-                                查看回顾 <i class="fas fa-images ml-2"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 订阅区域 -->
-    <section class="py-16 bg-primary bg-opacity-10">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl font-bold mb-6" data-aos="fade-up">订阅最新动态</h2>
-            <p class="text-gray-600 max-w-2xl mx-auto mb-8" data-aos="fade-up" data-aos-delay="100">
-                订阅毛不易的官方通讯，第一时间获取最新音乐、活动和独家内容。
-            </p>
-            
-            <form id="subscribe-form" class="max-w-md mx-auto flex flex-col md:flex-row gap-4" data-aos="fade-up" data-aos-delay="200">
-                <input type="email" id="email" class="flex-grow px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="输入您的邮箱地址">
-                <button type="submit" class="bg-primary hover:bg-secondary text-white font-medium py-3 px-8 rounded-full transition-colors">
-                    订阅
-                </button>
-            </form>
-            
-            <p class="text-gray-500 text-sm mt-4" data-aos="fade-up" data-aos-delay="300">
-                我们尊重您的隐私，不会向第三方分享您的信息。
-            </p>
-        </div>
-    </section>
+    </div>
 
     <!-- 页脚 -->
-    <footer class="bg-dark text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- 关于我们 -->
-                <div>
-                    <h3 class="text-xl font-bold mb-4">关于我们</h3>
-                    <p class="text-gray-400 mb-4">
-                        毛不易官方粉丝网站，致力于为全球粉丝提供最新、最全面的毛不易资讯和互动平台。
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-weibo text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-weixin text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-instagram text-xl"></i>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- 快速链接 -->
-                <div>
-                    <h3 class="text-xl font-bold mb-4">快速链接</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">首页</a></li>
-                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">关于毛毛</a></li>
-                        <li><a href="#music" class="text-gray-400 hover:text-white transition-colors">音乐作品</a></li>
-                        <li><a href="#concerts" class="text-gray-400 hover:text-white transition-colors">演唱会</a></li>
-                        <li><a href="#news" class="text-gray-400 hover:text-white transition-colors">新闻动态</a></li>
-                        <li><a href="#gallery" class="text-gray-400 hover:text-white transition-colors">图片 Gallery</a></li>
-                    </ul>
-                </div>
-                
-                <!-- 资源链接 -->
-                <div>
-                    <h3 class="text-xl font-bold mb-4">资源链接</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">音乐平台</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">官方商城</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">粉丝社区</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">媒体报道</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">合作联系</a></li>
-                    </ul>
-                </div>
-                
-                <!-- 联系我们 -->
-                <div>
-                    <h3 class="text-xl font-bold mb-4">联系我们</h3>
-                    <ul class="space-y-2">
-                        <li class="flex items-center">
-                            <i class="fas fa-envelope text-primary mr-2"></i>
-                            <a href="mailto:contact@maobuyi.com" class="text-gray-400 hover:text-white transition-colors">contact@maobuyi.com</a>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-phone text-primary mr-2"></i>
-                            <span class="text-gray-400">+86 123 4567 8910</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-map-marker-alt text-primary mr-2"></i>
-                            <span class="text-gray-400">北京市朝阳区音乐大厦</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-500 text-sm mb-4 md:mb-0">
-                    &copy; 2025 毛不易官方粉丝网站. 保留所有权利.
-                </p>
-                <div class="flex space-x-6">
-                    <a href="#" class="text-gray-500 hover:text-white text-sm transition-colors">隐私政策</a>
-                    <a href="#" class="text-gray-500 hover:text-white text-sm transition-colors">使用条款</a>
-                    <a href="#" class="text-gray-500 hover:text-white text-sm transition-colors">Cookie政策</a>
-                </div>
-            </div>
-        </div>
+    <footer class="mt-12 text-center text-gray-500 text-sm py-4">
+        <p>金额组合计算器 &copy; 2025</p>
     </footer>
 
-    <!-- 音乐播放器模态框 -->
-    <div id="music-player-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg w-full max-w-2xl mx-4 overflow-hidden">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 id="modal-song-title" class="text-2xl font-bold">歌曲名称</h3>
-                    <button id="close-player-modal" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-                
-                <div class="flex flex-col md:flex-row gap-6 items-center mb-6">
-                    <div class="w-48 h-48 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                        <img id="modal-song-image" src="" alt="歌曲封面" class="w-full h-full object-cover">
-                    </div>
-                    
-                    <div class="flex-grow">
-                        <div class="mb-4">
-                            <div class="flex justify-between items-center mb-1">
-                                <span id="current-time" class="text-sm text-gray-600">0:00</span>
-                                <span id="duration" class="text-sm text-gray-600">3:00</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div id="progress-bar" class="bg-primary h-2 rounded-full" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-center items-center space-x-6">
-                            <button class="text-gray-600 hover:text-primary">
-                                <i class="fas fa-step-backward text-xl"></i>
-                            </button>
-                            <button id="play-pause-btn" class="bg-primary hover:bg-secondary text-white rounded-full w-12 h-12 flex items-center justify-center">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <button class="text-gray-600 hover:text-primary">
-                                <i class="fas fa-step-forward text-xl"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="lyrics-container bg-gray-50 p-4 rounded-lg">
-                    <h4 class="font-bold mb-2 text-center">歌词</h4>
-                    <div id="song-lyrics" class="text-gray-700 text-center leading-relaxed">
-                        <!-- 歌词将在这里动态加载 -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 专辑详情模态框 -->
-    <div id="album-details-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg w-full max-w-4xl mx-4 overflow-hidden">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 id="modal-album-title" class="text-2xl font-bold">专辑名称</h3>
-                    <button id="close-album-modal" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="md:col-span-1">
-                        <img id="modal-album-image" src="" alt="专辑封面" class="w-full h-auto rounded-lg shadow-lg">
-                    </div>
-                    
-                    <div class="md:col-span-2">
-                        <div class="flex items-center mb-4">
-                            <span id="modal-album-year" class="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full mr-3">2018</span>
-                            <span id="modal-album-type" class="text-gray-600">录音室专辑</span>
-                        </div>
-                        
-                        <p id="modal-album-description" class="text-gray-700 mb-6 leading-relaxed">
-                            专辑描述将在这里显示...
-                        </p>
-                        
-                        <div class="mb-6">
-                            <h4 class="font-bold mb-2">制作团队</h4>
-                            <p id="modal-album-team" class="text-gray-700">
-                                制作人：李健、赵兆<br>
-                                编曲：赵兆<br>
-                                录音：李游<br>
-                                混音：赵靖
-                            </p>
-                        </div>
-                        
-                        <div class="flex flex-wrap gap-3">
-                            <a href="#" class="bg-primary hover:bg-secondary text-white font-medium py-2 px-6 rounded-full transition-colors flex items-center">
-                                <i class="fas fa-play mr-2"></i> 收听专辑
-                            </a>
-                            <a href="#" class="bg-white border border-primary text-primary hover:bg-primary hover:text-white font-medium py-2 px-6 rounded-full transition-colors flex items-center">
-                                <i class="fas fa-shopping-cart mr-2"></i> 购买专辑
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="font-bold mb-4">曲目列表</h4>
-                    <div id="modal-album-tracks" class="space-y-2">
-                        <!-- 曲目列表将在这里动态加载 -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 演唱会详情模态框 -->
-    <div id="concert-details-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg w-full max-w-4xl mx-4 overflow-hidden">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 id="modal-concert-title" class="text-2xl font-bold">演唱会名称</h3>
-                    <button id="close-concert-modal" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <img id="modal-concert-image" src="" alt="演唱会海报" class="w-full h-auto rounded-lg shadow-lg mb-4">
-                        <div class="grid grid-cols-3 gap-2">
-                            <img src="https://p3-doubao-search-sign.byteimg.com/labis/9d9b84a54acb880d4ea4af126a7a7391~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=AMdZo4JxUD5mrF5lgnJbj544Ufs%3D" alt="演唱会照片" class="w-full h-20 object-cover rounded-md">
-                            <img src="https://p3-doubao-search-sign.byteimg.com/labis/189d063601e58b55762963e83270744d~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=WWFvH6RoM7V8MC5wOSzVynwJRyM%3D" alt="演唱会照片" class="w-full h-20 object-cover rounded-md">
-                            <img src="https://p3-doubao-search-sign.byteimg.com/labis/4f44cefc785e5d7bb1cf4cf61232349c~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=IXq9x8e3cAbuciIB343Wx2c22wU%3D" alt="演唱会照片" class="w-full h-20 object-cover rounded-md">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <div class="flex items-center mb-4">
-                            <span id="modal-concert-date" class="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full mr-3">2018-2019</span>
-                            <span id="modal-concert-location" class="text-gray-600">全国巡演</span>
-                        </div>
-                        
-                        <p id="modal-concert-description" class="text-gray-700 mb-6 leading-relaxed">
-                            演唱会描述将在这里显示...
-                        </p>
-                        
-                        <div class="mb-6">
-                            <h4 class="font-bold mb-2">演出城市</h4>
-                            <div id="modal-concert-cities" class="flex flex-wrap gap-2">
-                                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">上海</span>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">北京</span>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">成都</span>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">广州</span>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">深圳</span>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">杭州</span>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <h4 class="font-bold mb-2">演出曲目</h4>
-                            <ul id="modal-concert-setlist" class="list-disc list-inside text-gray-700 space-y-1">
-                                <li>消愁</li>
-                                <li>像我这样的人</li>
-                                <li>平凡的一天</li>
-                                <li>一荤一素</li>
-                                <li>借</li>
-                                <li>盛夏</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="flex flex-wrap gap-3">
-                            <a href="#" class="bg-primary hover:bg-secondary text-white font-medium py-2 px-6 rounded-full transition-colors flex items-center">
-                                <i class="fas fa-video mr-2"></i> 观看回顾
-                            </a>
-                            <a href="#" class="bg-white border border-primary text-primary hover:bg-primary hover:text-white font-medium py-2 px-6 rounded-full transition-colors flex items-center">
-                                <i class="fas fa-ticket-alt mr-2"></i> 购票信息
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
     <script>
-        // 初始化AOS动画库
-        document.addEventListener('DOMContentLoaded', function() {
-            AOS.init({
-                duration: 800,
-                easing: 'ease-in-out',
-                once: true
-            });
+        // 全局变量
+        let combinationsChart = null;
+        let distributionChart = null;
+
+        // DOM 元素
+        const amountsInput = document.getElementById('amountsInput');
+        const inputForm = document.getElementById('inputForm');
+        const clearBtn = document.getElementById('clearBtn');
+        const exampleBtns = document.querySelectorAll('.example-btn');
+        
+        // 结果显示元素
+        const resultOverview = document.getElementById('resultOverview');
+        const totalSum = document.getElementById('totalSum');
+        const combinationCount = document.getElementById('combinationCount');
+        const usedCount = document.getElementById('usedCount');
+        const combinationsList = document.getElementById('combinationsList');
+        const combinationsContainer = document.getElementById('combinationsContainer');
+        const unusedAmounts = document.getElementById('unusedAmounts');
+        const unusedAmountsList = document.getElementById('unusedAmountsList');
+        const allAmounts = document.getElementById('allAmounts');
+        const allAmountsList = document.getElementById('allAmountsList');
+        const noResult = document.getElementById('noResult');
+        const initialPrompt = document.getElementById('initialPrompt');
+        const chartSection = document.getElementById('chartSection');
+
+        // 事件监听器
+        inputForm.addEventListener('submit', handleFormSubmit);
+        clearBtn.addEventListener('click', handleClear);
+        exampleBtns.forEach(btn => btn.addEventListener('click', handleExampleClick));
+
+        // 处理表单提交
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const inputText = amountsInput.value.trim();
             
-            // 导航栏滚动效果
-            const navbar = document.getElementById('navbar');
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('py-2');
-                    navbar.classList.remove('py-3');
-                } else {
-                    navbar.classList.add('py-3');
-                    navbar.classList.remove('py-2');
-                }
-            });
-            
-            // 移动端菜单切换
-            const menuToggle = document.getElementById('menu-toggle');
-            const mobileMenu = document.getElementById('mobile-menu');
-            
-            menuToggle.addEventListener('click', function() {
-                if (mobileMenu.classList.contains('invisible')) {
-                    mobileMenu.classList.remove('invisible', '-translate-y-full', 'opacity-0');
-                    mobileMenu.classList.add('translate-y-0', 'opacity-100');
-                    menuToggle.innerHTML = '<i class="fas fa-times text-xl"></i>';
-                } else {
-                    mobileMenu.classList.add('-translate-y-full', 'opacity-0');
-                    mobileMenu.classList.remove('translate-y-0', 'opacity-100');
-                    setTimeout(() => {
-                        mobileMenu.classList.add('invisible');
-                    }, 300);
-                    menuToggle.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-                }
-            });
-            
-            // 导航链接点击事件
-            const navLinks = document.querySelectorAll('.nav-link');
-            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-            
-            function setActiveLink() {
-                const scrollPosition = window.scrollY;
-                
-                document.querySelectorAll('section').forEach(section => {
-                    const sectionTop = section.offsetTop - 100;
-                    const sectionHeight = section.offsetHeight;
-                    const sectionId = section.getAttribute('id');
-                    
-                    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                        navLinks.forEach(link => {
-                            link.classList.remove('active');
-                            if (link.getAttribute('href') === '#' + sectionId) {
-                                link.classList.add('active');
-                            }
-                        });
-                    }
-                });
+            if (!inputText) {
+                showToast('请输入金额', 'warning');
+                return;
             }
             
-            window.addEventListener('scroll', setActiveLink);
-            setActiveLink();
+            // 解析输入的金额
+            const amounts = parseInput(inputText);
             
-            // 移动端导航链接点击关闭菜单
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    mobileMenu.classList.add('-translate-y-full', 'opacity-0');
-                    mobileMenu.classList.remove('translate-y-0', 'opacity-100');
-                    setTimeout(() => {
-                        mobileMenu.classList.add('invisible');
-                    }, 300);
-                    menuToggle.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-                });
-            });
-            
-            // 音乐播放器功能
-            const songPlayBtns = document.querySelectorAll('.song-play-btn');
-            const musicPlayerModal = document.getElementById('music-player-modal');
-            const closePlayerModal = document.getElementById('close-player-modal');
-            const modalSongTitle = document.getElementById('modal-song-title');
-            const modalSongImage = document.getElementById('modal-song-image');
-            const songLyrics = document.getElementById('song-lyrics');
-            const playPauseBtn = document.getElementById('play-pause-btn');
-            const progressBar = document.getElementById('progress-bar');
-            const currentTime = document.getElementById('current-time');
-            const duration = document.getElementById('duration');
-            
-            // 歌曲歌词数据
-            const songLyricsData = {
-                '消愁': `当你走进这欢乐场
-背上所有的梦与想
-各色的脸上各色的妆
-没人记得你的模样
-三巡酒过你在角落
-固执的唱着苦涩的歌
-听他在喧嚣里被淹没
-你拿起酒杯对自己说
-一杯敬朝阳 一杯敬月光
-唤醒我的向往 温柔了寒窗
-于是可以不回头地逆风飞翔
-不怕心头有雨 眼底有霜
-一杯敬故乡 一杯敬远方
-守着我的善良 催着我成长
-所以南北的路从此不再漫长
-灵魂不再无处安放
-一杯敬明天 一杯敬过往
-支撑我的身体 厚重了肩膀
-虽然从不相信所谓山高水长
-人生苦短何必念念不忘
-一杯敬自由 一杯敬死亡
-宽恕我的平凡 驱散了迷惘
-好吧天亮之后总是潦草离场
-清醒的人最荒唐
-好吧天亮之后总是潦草离场
-清醒的人最荒唐`,
-                
-                '像我这样的人': `像我这样优秀的人
-本该灿烂过一生
-怎么二十多年到头来
-还在人海里浮沉
-像我这样聪明的人
-早就告别了单纯
-怎么还是用了一段情
-去换一身伤痕
-像我这样迷茫的人
-像我这样寻找的人
-像我这样碌碌无为的人
-你还见过多少人
-像我这样庸俗的人
-从不喜欢装深沉
-怎么偶尔听到老歌时
-忽然也晃了神
-像我这样懦弱的人
-凡事都要留几分
-怎么曾经也会为了谁
-想过奋不顾身
-像我这样迷茫的人
-像我这样寻找的人
-像我这样碌碌无为的人
-你还见过多少人
-像我这样孤单的人
-像我这样傻的人
-像我这样不甘平凡的人
-世界上有多少人
-像我这样莫名其妙的人
-会不会有人心疼`,
-                
-                '平凡的一天': `每个早晨七点半就自然醒
-风铃响起又是一天云很轻
-晒好的衣服味道很安心
-一切都是柔软又宁静
-每个路口花都开在阳光里
-小店门前传来好听的恋曲
-不用太久就能走到目的地
-人来人往里满是善意
-这是最平凡的一天啊
-你也想念吗
-不追不赶慢慢走回家
-就这样虚度着年华 没牵挂
-只有晚风轻拂着脸颊
-日落之前斜阳融在小河里
-逛了黄昏市场收获很满意
-朋友打来电话说他在等你
-见面有聊不完的话题
-餐桌摆在开满花的院子里
-微微酒意阵阵欢歌笑语
-从不考虑明天应该去哪里
-因为今夜的风太和煦
-这是最平凡的一天啊
-你也想念吗
-不追不赶慢慢走回家
-就这样虚度着年华 没牵挂
-只有晚风轻拂着脸颊
-这是最完美的一天啊
-你也想要吗
-生活可以不那么复杂
-就这样虚度着年华 没牵挂
-只有晚风轻拂着脸颊
-总有一天 我们会找到她`,
-                
-                '一荤一素': `日出又日落 深处再深处
-一张小方桌 有一荤一素
-一个身影从容地忙忙碌碌
-一双手让这时光有了温度
-太年轻的人 他总是不满足
-固执地不愿停下 远行的脚步
-望着高高的天走了长长的路
-忘了回头看 她有没有哭
-月儿明 风儿轻
-可是你在敲打我的窗棂
-听到这儿你就别担心
-其实我过的还可以
-月儿明 风儿轻
-你又可曾来过我的梦里
-一定是你来时太小心
-知道我睡得轻
-太年轻的人 他总是不满足
-固执地不愿停下 远行的脚步
-望着高高的天走了长长的路
-忘了回头看 她有没有哭
-月儿明 风儿轻
-可是你在敲打我的窗棂
-听到这儿你就别担心
-其实我过的还可以
-月儿明 风儿轻
-你又可曾来过我的梦里
-一定是你来时太小心
-知道我睡得轻
-一定是你来时太小心
-怕我再想起你`,
-                
-                '二零三': `那天偶然走进你
-五月南风正和煦
-也许它的双手太多情
-让我想留在这里
-后来刮风又下雨
-我都躲在你怀里
-看着我所有的小脾气
-无论快乐或伤心
-虽然到现在 还孑然一身
-你会陪我默默忧愁到凌晨
-其实你知道 来来往往有多少人
-只是扬起了灰尘
-明天我就要远走
-最后和你挥挥手
-但你不会哭也不会挽留
-给我想要的自由
-虽然到现在 还不太安稳
-你会为我默默留下一盏灯
-其实你知道 匆匆忙忙有多少人
-渐渐丢失了单纯
-许多年之后 在哪里安身
-是否还能拥抱这样的温存
-其实我知道 于你而言我只不过是
-一个偶然路过的人
-其实我知道 于你而言我只不过是
-一个偶然路过的人`,
-                
-                '无名的人': `我是这路上 没名字的人
-我没有新闻 没有人评论
-要拼尽所有 换得普通的剧本
-曲折辗转 不过谋生
-我是离开 小镇上的人
-是哭笑着 吃过饭的人
-是赶路的人 是养家的人
-是城市背景的 无声
-我不过 想亲手触摸
-弯过腰的每一刻
-留下的 湿透的脚印 是不是值得
-这哽咽 若你也相同
-就是同路的朋友
-致所有 顶天立地 却平凡普通的
-无名的人啊 我敬你一杯酒
-敬你的沉默 和每一声怒吼
-敬你弯着腰 上山往高处走
-头顶 苍穹 努力地生活
-你来自于 南方的村落
-来自粗糙的双手
-你站在 楼宇的缝隙 可你没有退缩
-我来自于 北方的春天
-来自一步一回首
-背后有 告别的路口 温暖每个日落
-当家乡 入冬的时候
-列车到站 以后
-小时候的风 再吹过
-回忆 起单纯的快乐
-在熟悉的 街头
-有人 会用所有的温柔 喊出你的 名字
-无名的人啊 我敬你一杯酒
-敬你的沉默 和每一声怒吼
-敬你弯着腰 上山往高处走
-头顶 苍穹 努力地生活
-无名的人啊 我敬你一杯酒
-敬你的沉默 和每一声怒吼
-敬你弯着腰 上山往高处走
-头顶 苍穹 努力地生活
-无名的人啊
-无名的人啊
-无名的人啊 车来啦
-太多牵挂就 别回头啊
-无名的人啊 车开啦
-往前吧 带着你的梦`
-            };
-            
-            // 歌曲图片数据
-            const songImagesData = {
-                '消愁': 'https://p3-doubao-search-sign.byteimg.com/labis/4f44cefc785e5d7bb1cf4cf61232349c~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=IXq9x8e3cAbuciIB343Wx2c22wU%3D',
-                '像我这样的人': 'https://p3-doubao-search-sign.byteimg.com/labis/7bc7811384ab7203779c096282391523~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=yoqTbV%2FwfTBbQlzBxXoSq%2F4izUQ%3D',
-                '平凡的一天': 'https://p11-doubao-search-sign.byteimg.com/ecom-shop-material/jpeg_m_862bfffd7a4166a86e06400f2e2d71da_sx_78831_www800-800~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=aHgNuIEP6luqRHC4aD8nZ%2By7CFw%3D',
-                '一荤一素': 'https://p3-doubao-search-sign.byteimg.com/labis/189d063601e58b55762963e83270744d~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=WWFvH6RoM7V8MC5wOSzVynwJRyM%3D',
-                '二零三': 'https://p11-doubao-search-sign.byteimg.com/labis/c201097a4fa59d006ec87e68832e71ca~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=2C48IXUKELE0fozZHL6E7txQUhg%3D',
-                '无名的人': 'https://p11-doubao-search-sign.byteimg.com/labis/0f8777c9530008e53947c4d1a3f26b48~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=S3stA9xnAUeDdrBOP2WbZgDnwKQ%3D'
-            };
-            
-            // 打开音乐播放器
-            songPlayBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const songName = this.getAttribute('data-song');
-                    modalSongTitle.textContent = songName;
-                    modalSongImage.src = songImagesData[songName] || 'https://p11-doubao-search-sign.byteimg.com/labis/0483b9a7c653c4b566fd0314a36688be~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=PzHCzWXIhPjuOmJOKdaxCmOIDok%3D';
-                    
-                    // 显示歌词
-                    if (songLyricsData[songName]) {
-                        const lyrics = songLyricsData[songName].split('\n').map(line => `<p>${line}</p>`).join('');
-                        songLyrics.innerHTML = lyrics;
-                    } else {
-                        songLyrics.innerHTML = '<p>暂无歌词</p>';
-                    }
-                    
-                    // 重置播放器状态
-                    progressBar.style.width = '0%';
-                    currentTime.textContent = '0:00';
-                    duration.textContent = '3:00';
-                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                    
-                    // 显示模态框
-                    musicPlayerModal.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                });
-            });
-            
-            // 关闭音乐播放器
-            closePlayerModal.addEventListener('click', function() {
-                musicPlayerModal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            });
-            
-            // 点击模态框外部关闭
-            musicPlayerModal.addEventListener('click', function(e) {
-                if (e.target === musicPlayerModal) {
-                    musicPlayerModal.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                }
-            });
-            
-            // 播放/暂停按钮
-            let isPlaying = false;
-            playPauseBtn.addEventListener('click', function() {
-                isPlaying = !isPlaying;
-                if (isPlaying) {
-                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                    // 模拟播放进度
-                    startProgressSimulation();
-                } else {
-                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                    // 停止模拟进度
-                    stopProgressSimulation();
-                }
-            });
-            
-            // 模拟播放进度
-            let progressInterval;
-            function startProgressSimulation() {
-                let progress = 0;
-                progressInterval = setInterval(() => {
-                    progress += 0.5;
-                    if (progress > 100) {
-                        progress = 0;
-                        isPlaying = false;
-                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                        clearInterval(progressInterval);
-                    }
-                    progressBar.style.width = `${progress}%`;
-                    
-                    // 更新时间
-                    const totalSeconds = 180; // 3分钟
-                    const currentSeconds = Math.floor(totalSeconds * (progress / 100));
-                    currentTime.textContent = formatTime(currentSeconds);
-                }, 500);
+            if (amounts.length === 0) {
+                showToast('无法解析输入的金额', 'error');
+                return;
             }
             
-            function stopProgressSimulation() {
-                clearInterval(progressInterval);
+            // 计算最多的不重叠组合
+            const result = findMaxCombinations(amounts);
+            
+            // 显示结果
+            displayResults(result, amounts);
+        }
+
+        // 处理清空按钮点击
+        function handleClear() {
+            amountsInput.value = '';
+            resetResults();
+            showToast('已清空输入', 'info');
+        }
+
+        // 处理示例按钮点击
+        function handleExampleClick(e) {
+            amountsInput.value = e.target.textContent.trim();
+            inputForm.dispatchEvent(new Event('submit'));
+        }
+
+        // 解析输入的金额
+        function parseInput(inputText) {
+            // 支持逗号、空格、换行等分隔符
+            const values = inputText.split(/[\s,\n]+/);
+            
+            return values
+                .map(val => val.trim())
+                .filter(val => val !== '')
+                .map(val => {
+                    // 尝试解析为数字
+                    const num = parseFloat(val);
+                    return isNaN(num) ? null : num;
+                })
+                .filter(num => num !== null && num > 0); // 只保留正数
+        }
+
+        // 查找最多的不重叠组合
+        function findMaxCombinations(amounts) {
+            // 按金额从大到小排序，有助于贪心算法找到更多组合
+            amounts.sort((a, b) => b - a);
+            
+            const target = 100;
+            const used = new Set(); // 记录已使用的金额索引
+            const combinations = [];
+            
+            // 贪心策略：先尝试用单个金额组成组合（如果金额≥100）
+            for (let i = 0; i < amounts.length; i++) {
+                if (amounts[i] >= target && !used.has(i)) {
+                    combinations.push([amounts[i]]);
+                    used.add(i);
+                }
             }
             
-            function formatTime(seconds) {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-            }
-            
-            // 专辑详情功能
-            const albumDetailsBtns = document.querySelectorAll('.album-details-btn');
-            const albumDetailsModal = document.getElementById('album-details-modal');
-            const closeAlbumModal = document.getElementById('close-album-modal');
-            const modalAlbumTitle = document.getElementById('modal-album-title');
-            const modalAlbumImage = document.getElementById('modal-album-image');
-            const modalAlbumYear = document.getElementById('modal-album-year');
-            const modalAlbumDescription = document.getElementById('modal-album-description');
-            const modalAlbumTeam = document.getElementById('modal-album-team');
-            const modalAlbumTracks = document.getElementById('modal-album-tracks');
-            
-            // 专辑数据
-            const albumData = {
-                'album1': {
-                    title: '平凡的一天',
-                    image: 'https://p11-doubao-search-sign.byteimg.com/ecom-shop-material/jpeg_m_862bfffd7a4166a86e06400f2e2d71da_sx_78831_www800-800~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=aHgNuIEP6luqRHC4aD8nZ%2By7CFw%3D',
-                    year: '2018',
-                    description: '《平凡的一天》是毛不易首张个人录音室专辑，由李健、赵兆担任制作人。专辑以"平凡"为主题，收录了11首原创歌曲，展现了毛不易对生活的观察和感悟。专辑上线仅15分钟单曲销量就突破了50万，1分钟内实体专辑销量突破1.8万张。',
-                    team: '制作人：李健、赵兆\n编曲：赵兆\n录音：李游\n混音：赵靖\n母带：Chris Gehringer',
-                    tracks: [
-                        '平凡的一天',
-                        '给你给我',
-                        '消愁',
-                        '像我这样的人',
-                        '一程山路',
-                        '小王',
-                        '等',
-                        '二零三',
-                        '借',
-                        '一荤一素',
-                        '盛夏'
-                    ]
-                },
-                'album2': {
-                    title: '小王',
-                    image: 'https://p11-doubao-search-sign.byteimg.com/labis/c201097a4fa59d006ec87e68832e71ca~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=2C48IXUKELE0fozZHL6E7txQUhg%3D',
-                    year: '2020',
-                    description: '《小王》是毛不易第二张个人录音室专辑，收录11首原创歌曲。专辑以毛不易的本名"小王"命名，是对过去自己的回望和告别。专辑中的《二零三》获得第27届东方风云榜最佳作词奖。',
-                    team: '制作人：毛不易、赵兆\n编曲：赵兆、宋涛\n录音：李游\n混音：赵靖\n母带：Chris Gehringer',
-                    tracks: [
-                        '小王',
-                        '二零三',
-                        '水乡',
-                        '胡同',
-                        '深夜一角',
-                        '一程山路',
-                        '等',
-                        '借',
-                        '一荤一素',
-                        '盛夏',
-                        '小王日记'
-                    ]
-                },
-                'album3': {
-                    title: '幼鸟指南',
-                    image: 'https://p11-doubao-search-sign.byteimg.com/ecom-shop-material/jpeg_m_d6f437118cf550c9caa2ff9955f8a574_sx_49329_www800-800~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=ebkBoHurau191TfxFh516QeIIh0%3D',
-                    year: '2021',
-                    description: '《幼鸟指南》是毛不易第三张个人录音室专辑，收录11首原创歌曲。专辑以"成长"为主题，展现了毛不易从"小王"到"毛不易"的成长历程。凭借该专辑获得亚洲流行音乐大奖2021大众选择奖、年度TOP20专辑奖。',
-                    team: '制作人：毛不易、荒井十一\n编曲：荒井十一、彭飞\n录音：李游\n混音：赵靖\n母带：Chris Gehringer',
-                    tracks: [
-                        '城市傍晚',
-                        '海上日记',
-                        '在此山中',
-                        '幼鸟',
-                        '旅行家',
-                        '或者',
-                        '缝隙',
-                        '若有缘由',
-                        '于是没有洗头',
-                        '纯净无比',
-                        '爱啊'
-                    ]
-                }
-            };
-            
-            // 打开专辑详情
-            albumDetailsBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const albumId = this.getAttribute('data-album');
-                    const album = albumData[albumId];
-                    
-                    modalAlbumTitle.textContent = album.title;
-                    modalAlbumImage.src = album.image;
-                    modalAlbumYear.textContent = album.year;
-                    modalAlbumDescription.textContent = album.description;
-                    modalAlbumTeam.textContent = album.team;
-                    
-                    // 显示曲目列表
-                    const tracksHtml = album.tracks.map((track, index) => `
-                        <div class="flex items-center justify-between py-2 border-b border-gray-100">
-                            <span class="font-medium">${index + 1}. ${track}</span>
-                            <button class="text-primary hover:text-secondary">
-                                <i class="fas fa-play-circle"></i>
-                            </button>
-                        </div>
-                    `).join('');
-                    modalAlbumTracks.innerHTML = tracksHtml;
-                    
-                    // 显示模态框
-                    albumDetailsModal.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                });
-            });
-            
-            // 关闭专辑详情
-            closeAlbumModal.addEventListener('click', function() {
-                albumDetailsModal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            });
-            
-            // 点击模态框外部关闭
-            albumDetailsModal.addEventListener('click', function(e) {
-                if (e.target === albumDetailsModal) {
-                    albumDetailsModal.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                }
-            });
-            
-            // 演唱会详情功能
-            const concertDetailsBtns = document.querySelectorAll('.concert-details-btn');
-            const concertDetailsModal = document.getElementById('concert-details-modal');
-            const closeConcertModal = document.getElementById('close-concert-modal');
-            const modalConcertTitle = document.getElementById('modal-concert-title');
-            const modalConcertImage = document.getElementById('modal-concert-image');
-            const modalConcertDate = document.getElementById('modal-concert-date');
-            const modalConcertLocation = document.getElementById('modal-concert-location');
-            const modalConcertDescription = document.getElementById('modal-concert-description');
-            const modalConcertCities = document.getElementById('modal-concert-cities');
-            const modalConcertSetlist = document.getElementById('modal-concert-setlist');
-            
-            // 演唱会数据
-            const concertData = {
-                'concert1': {
-                    title: '像我这样的人 全国巡回演唱会',
-                    image: 'https://p3-doubao-search-sign.byteimg.com/labis/9d9b84a54acb880d4ea4af126a7a7391~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=AMdZo4JxUD5mrF5lgnJbj544Ufs%3D',
-                    date: '2018-2019',
-                    location: '全国巡演',
-                    description: '毛不易首次个人巡回演唱会，以《平凡的一天》专辑为主要内容，演唱了《消愁》《像我这样的人》等多首热门歌曲，场场爆满，深受粉丝喜爱。',
-                    cities: ['上海', '北京', '成都', '广州', '深圳', '杭州', '南京', '武汉', '西安', '重庆'],
-                    setlist: [
-                        '消愁',
-                        '像我这样的人',
-                        '平凡的一天',
-                        '一荤一素',
-                        '借',
-                        '盛夏',
-                        '二零三',
-                        '等',
-                        '一程山路',
-                        '给你给我',
-                        '小王',
-                        '感觉自己是巨星'
-                    ]
-                },
-                'concert2': {
-                    title: '毛不易2022全国巡回演唱会',
-                    image: 'https://p3-doubao-search-sign.byteimg.com/labis/189d063601e58b55762963e83270744d~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=WWFvH6RoM7V8MC5wOSzVynwJRyM%3D',
-                    date: '2022',
-                    location: '全国巡演',
-                    description: '以《幼鸟指南》专辑为主题的全国巡回演唱会，展现了毛不易音乐风格的多样性和成长。演唱会舞台设计精美，视听效果震撼，获得了广泛好评。',
-                    cities: ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '西安', '重庆', '长沙'],
-                    setlist: [
-                        '城市傍晚',
-                        '海上日记',
-                        '幼鸟',
-                        '旅行家',
-                        '于是没有洗头',
-                        '消愁',
-                        '像我这样的人',
-                        '平凡的一天',
-                        '一荤一素',
-                        '二零三',
-                        '无名的人',
-                        '爱啊'
-                    ]
-                },
-                'concert3': {
-                    title: '线上演唱会',
-                    image: 'https://p26-doubao-search-sign.byteimg.com/pgc-image/534593f55cb84ef4b60928249e43b390~tplv-be4g95zd3a-image.jpeg?rk3s=542c0f93&x-expires=1782193699&x-signature=%2FXVzRRX3xH202PzhlLYrDF5ahT0%3D',
-                    date: '2020-2021',
-                    location: '线上直播',
-                    description: '疫情期间举办的线上演唱会，通过互联网连接全球粉丝，创新的演出形式获得广泛好评。演唱会采用多机位拍摄，视听效果出色，为粉丝带来了沉浸式的观看体验。',
-                    cities: ['线上直播'],
-                    setlist: [
-                        '消愁',
-                        '像我这样的人',
-                        '平凡的一天',
-                        '一荤一素',
-                        '二零三',
-                        '小王',
-                        '水乡',
-                        '胡同',
-                        '深夜一角',
-                        '借',
-                        '盛夏',
-                        '感觉自己是巨星'
-                    ]
-                }
-            };
-            
-            // 打开演唱会详情
-            concertDetailsBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const concertId = this.getAttribute('data-concert');
-                    const concert = concertData[concertId];
-                    
-                    modalConcertTitle.textContent = concert.title;
-                    modalConcertImage.src = concert.image;
-                    modalConcertDate.textContent = concert.date;
-                    modalConcertLocation.textContent = concert.location;
-                    modalConcertDescription.textContent = concert.description;
-                    
-                    // 显示演出城市
-                    const citiesHtml = concert.cities.map(city => `
-                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">${city}</span>
-                    `).join('');
-                    modalConcertCities.innerHTML = citiesHtml;
-                    
-                    // 显示演出曲目
-                    const setlistHtml = concert.setlist.map(track => `<li>${track}</li>`).join('');
-                    modalConcertSetlist.innerHTML = setlistHtml;
-                    
-                    // 显示模态框
-                    concertDetailsModal.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                });
-            });
-            
-            // 关闭演唱会详情
-            closeConcertModal.addEventListener('click', function() {
-                concertDetailsModal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            });
-            
-            // 点击模态框外部关闭
-            concertDetailsModal.addEventListener('click', function(e) {
-                if (e.target === concertDetailsModal) {
-                    concertDetailsModal.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                }
-            });
-            
-            // 图片Gallery筛选功能
-            const galleryFilterBtns = document.querySelectorAll('.gallery-filter-btn');
-            const galleryItems = document.querySelectorAll('.gallery-item');
-            
-            galleryFilterBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // 移除所有按钮的active状态
-                    galleryFilterBtns.forEach(b => {
-                        b.classList.remove('active', 'bg-primary', 'text-white');
-                        b.classList.add('bg-gray-100', 'text-gray-700');
-                    });
-                    
-                    // 添加当前按钮的active状态
-                    this.classList.add('active', 'bg-primary', 'text-white');
-                    this.classList.remove('bg-gray-100', 'text-gray-700');
-                    
-                    const filter = this.getAttribute('data-filter');
-                    
-                    // 筛选图片
-                    galleryItems.forEach(item => {
-                        if (filter === 'all' || item.classList.contains(filter)) {
-                            item.style.display = 'block';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                });
-            });
-            
-            // 加载更多图片
-            const loadMoreGallery = document.getElementById('load-more-gallery');
-            loadMoreGallery.addEventListener('click', function() {
-                // 模拟加载更多图片
-                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 加载中...';
+            // 对于剩余金额，尝试组合成和≥100的组合
+            // 使用贪心策略：从最大的未使用金额开始，尝试添加其他金额直到和≥100
+            for (let i = 0; i < amounts.length; i++) {
+                if (used.has(i)) continue;
                 
-                setTimeout(() => {
-                    this.innerHTML = '没有更多图片了';
-                    this.disabled = true;
-                    this.classList.add('opacity-50', 'cursor-not-allowed');
-                }, 1500);
-            });
-            
-            // 加载更多新闻
-            const loadMoreNews = document.getElementById('load-more-news');
-            loadMoreNews.addEventListener('click', function() {
-                // 模拟加载更多新闻
-                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 加载中...';
+                const currentCombination = [amounts[i]];
+                let currentSum = amounts[i];
+                used.add(i);
                 
-                setTimeout(() => {
-                    this.innerHTML = '没有更多新闻了';
-                    this.disabled = true;
-                    this.classList.add('opacity-50', 'cursor-not-allowed');
-                }, 1500);
-            });
-            
-            // 粉丝留言功能
-            const submitMessage = document.getElementById('submit-message');
-            const fanMessage = document.getElementById('fan-message');
-            const fanName = document.getElementById('fan-name');
-            const messagesContainer = document.getElementById('messages-container');
-            
-            submitMessage.addEventListener('click', function() {
-                const message = fanMessage.value.trim();
-                const name = fanName.value.trim() || '匿名粉丝';
-                
-                if (message) {
-                    // 创建新留言
-                    const newMessage = document.createElement('div');
-                    newMessage.className = 'bg-gray-50 p-4 rounded-lg fade-in';
-                    
-                    const today = new Date();
-                    const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                    
-                    newMessage.innerHTML = `
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-primary">${name}</span>
-                            <span class="text-gray-500 text-sm">${dateString}</span>
-                        </div>
-                        <p class="text-gray-700">${message}</p>
-                    `;
-                    
-                    // 添加到留言板
-                    messagesContainer.prepend(newMessage);
-                    
-                    // 清空输入框
-                    fanMessage.value = '';
-                    fanName.value = '';
-                    
-                    // 显示成功提示
-                    alert('留言提交成功！');
-                } else {
-                    alert('请输入留言内容！');
-                }
-            });
-            
-            // 订阅表单功能
-            const subscribeForm = document.getElementById('subscribe-form');
-            const email = document.getElementById('email');
-            
-            subscribeForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const emailValue = email.value.trim();
-                
-                if (emailValue && validateEmail(emailValue)) {
-                    // 模拟订阅
-                    subscribeForm.innerHTML = '<div class="w-full flex items-center justify-center py-2"><i class="fas fa-spinner fa-spin mr-2"></i> 订阅中...</div>';
-                    
-                    setTimeout(() => {
-                        subscribeForm.innerHTML = '<div class="w-full text-center text-green-600"><i class="fas fa-check-circle mr-2"></i> 订阅成功！感谢您的关注！</div>';
+                // 尝试添加更多金额
+                for (let j = i + 1; j < amounts.length; j++) {
+                    if (!used.has(j)) {
+                        currentCombination.push(amounts[j]);
+                        currentSum += amounts[j];
+                        used.add(j);
                         
-                        // 重置表单
-                        setTimeout(() => {
-                            email.value = '';
-                            subscribeForm.innerHTML = `
-                                <input type="email" id="email" class="flex-grow px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="输入您的邮箱地址">
-                                <button type="submit" class="bg-primary hover:bg-secondary text-white font-medium py-3 px-8 rounded-full transition-colors">
-                                    订阅
-                                </button>
-                            `;
-                            
-                            // 重新绑定事件
-                            const newEmail = document.getElementById('email');
-                            const newSubmitBtn = subscribeForm.querySelector('button[type="submit"]');
-                            
-                            newSubmitBtn.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                
-                                const emailValue = newEmail.value.trim();
-                                
-                                if (emailValue && validateEmail(emailValue)) {
-                                    subscribeForm.innerHTML = '<div class="w-full flex items-center justify-center py-2"><i class="fas fa-spinner fa-spin mr-2"></i> 订阅中...</div>';
-                                    
-                                    setTimeout(() => {
-                                        subscribeForm.innerHTML = '<div class="w-full text-center text-green-600"><i class="fas fa-check-circle mr-2"></i> 订阅成功！感谢您的关注！</div>';
-                                        
-                                        setTimeout(() => {
-                                            newEmail.value = '';
-                                            subscribeForm.innerHTML = `
-                                                <input type="email" id="email" class="flex-grow px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="输入您的邮箱地址">
-                                                <button type="submit" class="bg-primary hover:bg-secondary text-white font-medium py-3 px-8 rounded-full transition-colors">
-                                                    订阅
-                                                </button>
-                                            `;
-                                        }, 3000);
-                                    }, 1500);
-                                } else {
-                                    alert('请输入有效的邮箱地址！');
-                                }
-                            });
-                        }, 3000);
-                    }, 1500);
+                        // 如果和已经≥100，停止添加
+                        if (currentSum >= target) {
+                            break;
+                        }
+                    }
+                }
+                
+                // 如果组合和≥100，添加到结果中
+                if (currentSum >= target) {
+                    combinations.push(currentCombination);
                 } else {
-                    alert('请输入有效的邮箱地址！');
+                    // 否则释放已使用的金额
+                    currentCombination.forEach(amount => {
+                        const index = amounts.indexOf(amount);
+                        if (index !== -1) used.delete(index);
+                    });
+                }
+            }
+            
+            // 计算统计信息
+            const totalSum = combinations.reduce((sum, combo) => sum + combo.reduce((a, b) => a + b, 0), 0);
+            const unusedAmounts = amounts.filter((_, index) => !used.has(index));
+            const unusedSum = unusedAmounts.reduce((a, b) => a + b, 0);
+            
+            return {
+                combinations,
+                totalSum,
+                unusedAmounts,
+                unusedSum,
+                hasValidCombination: combinations.length > 0
+            };
+        }
+
+        // 显示结果
+        function displayResults(result, allAmounts) {
+            // 重置结果区域
+            resetResults();
+            
+            if (!result.hasValidCombination) {
+                noResult.classList.remove('hidden');
+                initialPrompt.classList.add('hidden');
+                return;
+            }
+            
+            // 显示结果概览
+            resultOverview.classList.remove('hidden');
+            totalSum.textContent = result.totalSum.toFixed(2);
+            combinationCount.textContent = result.combinations.length.toString();
+            usedCount.textContent = allAmounts.length - result.unusedAmounts.length;
+            
+            // 显示组合列表
+            combinationsList.classList.remove('hidden');
+            combinationsContainer.innerHTML = '';
+            
+            result.combinations.forEach((combination, index) => {
+                const comboSum = combination.reduce((a, b) => a + b, 0);
+                const comboDiff = comboSum - 100;
+                
+                const comboDiv = document.createElement('div');
+                comboDiv.className = 'mb-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm animate-fade-in';
+                comboDiv.style.animationDelay = `${0.1 * index}s`;
+                
+                const comboHeader = document.createElement('div');
+                comboHeader.className = 'flex justify-between items-center mb-2';
+                
+                const comboTitle = document.createElement('h4');
+                comboTitle.className = 'font-medium text-gray-800';
+                comboTitle.textContent = `组合 ${index + 1}`;
+                
+                const comboInfo = document.createElement('div');
+                comboInfo.className = 'flex items-center gap-2';
+                
+                const sumBadge = document.createElement('span');
+                sumBadge.className = 'badge bg-blue-100 text-blue-800';
+                sumBadge.textContent = `总和: ${comboSum.toFixed(2)}`;
+                
+                const diffBadge = document.createElement('span');
+                diffBadge.className = comboDiff === 0 ? 'badge-success' : 'badge-warning';
+                diffBadge.textContent = comboDiff === 0 ? '刚好等于100' : `超出: ${comboDiff.toFixed(2)}`;
+                
+                comboInfo.appendChild(sumBadge);
+                comboInfo.appendChild(diffBadge);
+                comboHeader.appendChild(comboTitle);
+                comboHeader.appendChild(comboInfo);
+                
+                const amountsList = document.createElement('div');
+                amountsList.className = 'flex flex-wrap gap-2';
+                
+                combination.forEach(amount => {
+                    const amountEl = document.createElement('span');
+                    amountEl.className = 'amount-item amount-item-selected';
+                    amountEl.textContent = amount.toFixed(2);
+                    amountsList.appendChild(amountEl);
+                });
+                
+                comboDiv.appendChild(comboHeader);
+                comboDiv.appendChild(amountsList);
+                combinationsContainer.appendChild(comboDiv);
+            });
+            
+            // 显示未使用的金额
+            if (result.unusedAmounts.length > 0) {
+                unusedAmounts.classList.remove('hidden');
+                result.unusedAmounts.forEach(amount => {
+                    const amountEl = document.createElement('span');
+                    amountEl.className = 'amount-item amount-item-unselected';
+                    amountEl.textContent = amount.toFixed(2);
+                    unusedAmountsList.appendChild(amountEl);
+                });
+            }
+            
+            // 显示所有金额
+            allAmounts.classList.remove('hidden');
+            allAmounts.forEach(amount => {
+                // 检查金额是否在任何组合中
+                const isUsed = result.combinations.some(combo => combo.includes(amount));
+                const amountEl = document.createElement('span');
+                amountEl.className = `amount-item ${isUsed ? 'amount-item-selected' : 'amount-item-unselected'}`;
+                amountEl.textContent = amount.toFixed(2);
+                allAmountsList.appendChild(amountEl);
+            });
+            
+            // 显示图表
+            chartSection.classList.remove('hidden');
+            createCharts(result, allAmounts);
+            
+            // 隐藏初始提示
+            initialPrompt.classList.add('hidden');
+            
+            // 滚动到结果区域
+            resultOverview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 重置结果显示
+        function resetResults() {
+            resultOverview.classList.add('hidden');
+            combinationsList.classList.add('hidden');
+            unusedAmounts.classList.add('hidden');
+            allAmounts.classList.add('hidden');
+            noResult.classList.add('hidden');
+            initialPrompt.classList.remove('hidden');
+            chartSection.classList.add('hidden');
+            
+            combinationsContainer.innerHTML = '';
+            unusedAmountsList.innerHTML = '';
+            allAmountsList.innerHTML = '';
+            
+            // 重置图表
+            if (combinationsChart) {
+                combinationsChart.destroy();
+                combinationsChart = null;
+            }
+            
+            if (distributionChart) {
+                distributionChart.destroy();
+                distributionChart = null;
+            }
+        }
+
+        // 创建图表
+        function createCharts(result, allAmounts) {
+            // 创建组合对比图表
+            const combinationsCtx = document.getElementById('combinationsChart').getContext('2d');
+            
+            combinationsChart = new Chart(combinationsCtx, {
+                type: 'bar',
+                data: {
+                    labels: result.combinations.map((_, i) => `组合 ${i + 1}`),
+                    datasets: [{
+                        label: '组合总和',
+                        data: result.combinations.map(c => c.reduce((a, b) => a + b, 0)),
+                        backgroundColor: result.combinations.map(() => '#3b82f6'),
+                        borderColor: result.combinations.map(() => '#1e40af'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    const combo = result.combinations[index];
+                                    const diff = combo.reduce((a, b) => a + b, 0) - 100;
+                                    return [
+                                        `差额: ${diff.toFixed(2)}`,
+                                        `金额数量: ${combo.length}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(100, ...result.combinations.map(c => c.reduce((a, b) => a + b, 0))) * 1.1,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    // 添加目标线
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                targetLine: {
+                                    type: 'line',
+                                    yMin: 100,
+                                    yMax: 100,
+                                    borderColor: '#10b981',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: '目标 (100)',
+                                        enabled: true,
+                                        position: 'end'
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             });
             
-            // 邮箱验证函数
-            function validateEmail(email) {
-                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return re.test(email);
+            // 创建金额分布图表
+            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+            
+            // 将金额分组
+            const groups = {
+                '已使用': allAmounts.length - result.unusedAmounts.length,
+                '未使用': result.unusedAmounts.length
+            };
+            
+            distributionChart = new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(groups),
+                    datasets: [{
+                        data: Object.values(groups),
+                        backgroundColor: ['#3b82f6', '#94a3b8'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // 显示提示消息
+        function showToast(message, type = 'info') {
+            // 创建提示元素
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-0 opacity-0`;
+            
+            // 设置不同类型的样式
+            switch (type) {
+                case 'success':
+                    toast.classList.add('bg-green-500', 'text-white');
+                    toast.innerHTML = `<i class="fa fa-check-circle mr-2"></i>${message}`;
+                    break;
+                case 'error':
+                    toast.classList.add('bg-red-500', 'text-white');
+                    toast.innerHTML = `<i class="fa fa-times-circle mr-2"></i>${message}`;
+                    break;
+                case 'warning':
+                    toast.classList.add('bg-yellow-500', 'text-white');
+                    toast.innerHTML = `<i class="fa fa-exclamation-triangle mr-2"></i>${message}`;
+                    break;
+                default:
+                    toast.classList.add('bg-blue-500', 'text-white');
+                    toast.innerHTML = `<i class="fa fa-info-circle mr-2"></i>${message}`;
             }
-        });
+            
+            // 添加到页面
+            document.body.appendChild(toast);
+            
+            // 显示提示
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-0');
+                toast.classList.add('translate-y-[-10px]', 'opacity-100');
+            }, 10);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                toast.classList.remove('translate-y-[-10px]', 'opacity-100');
+                toast.classList.add('translate-y-0', 'opacity-0');
+                
+                // 移除元素
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
